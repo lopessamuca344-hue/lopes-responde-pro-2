@@ -1,42 +1,42 @@
 const { processChatMessage } = require("../services/chat");
-const { requireApiKey } = require("../middleware/apiAuth");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
     return res.status(405).json({
       erro: "Método não permitido"
     });
   }
 
-  const autorizado = await new Promise((resolve) => {
-    requireApiKey(req, res, () => {
-      resolve(true);
-    });
-
-    if (res.headersSent) {
-      resolve(false);
-    }
-  });
-
-  if (!autorizado) {
-    return;
-  }
-
   try {
     const { message } = req.body || {};
 
-    if (!message || typeof message !== "string") {
+    if (typeof message !== "string" || !message.trim()) {
       return res.status(400).json({
-        erro: "Mensagem inválida"
+        erro: "Digite uma mensagem válida."
       });
     }
 
-    const result = await processChatMessage(message);
+    if (message.length > 4000) {
+      return res.status(413).json({
+        erro: "A mensagem ultrapassa o limite de 4.000 caracteres."
+      });
+    }
 
+    const result = await processChatMessage(message.trim());
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      erro: error.message || "Erro interno do servidor"
+    console.error("Erro em /api/chat:", error);
+    const message = error?.message || "";
+
+    if (message.includes("GEMINI_API_KEY não configurada")) {
+      return res.status(503).json({
+        erro: "A IA ainda não está configurada no servidor. Verifique a variável GEMINI_API_KEY no Vercel."
+      });
+    }
+
+    return res.status(502).json({
+      erro: "Não foi possível obter uma resposta do Gemini. Verifique a configuração da IA e tente novamente."
     });
   }
 };
