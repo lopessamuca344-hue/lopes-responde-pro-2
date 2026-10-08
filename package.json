@@ -1,0 +1,13 @@
+{
+  "name": "lopes-responde-pro-2",
+  "version": "2.0.0",
+  "description": "Lopes Responde Pro 2.0 - novo projeto oficial de IA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "private": true
+}
