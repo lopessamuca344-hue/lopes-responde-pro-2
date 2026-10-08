@@ -1,13 +1,15 @@
 {
   "name": "lopes-responde-pro-2",
   "version": "2.0.0",
-  "description": "Lopes Responde Pro 2.0 - novo projeto oficial de IA",
+  "description": "Lopes Responde Pro 2.0 — assistente inteligente",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
-  "engines": {
-    "node": ">=20"
-  },
-  "private": true
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  }
 }
