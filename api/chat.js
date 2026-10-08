@@ -8,31 +8,27 @@ module.exports = async (req, res) => {
     });
   }
 
+  const autorizado = requireApiKey(req, res, () => {});
+
+  if (!autorizado) {
+    return;
+  }
+
   try {
-    await new Promise((resolve, reject) => {
-      requireApiKey(req, res, (error) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-
-        resolve();
-      });
-    });
-
     const { message } = req.body || {};
+
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({
+        erro: "Mensagem inválida"
+      });
+    }
 
     const result = await processChatMessage(message);
 
     return res.status(200).json(result);
-
   } catch (error) {
-    if (res.headersSent) {
-      return;
-    }
-
-    return res.status(401).json({
-      erro: error.message || "Não autorizado"
+    return res.status(500).json({
+      erro: error.message || "Erro interno do servidor"
     });
   }
 };
