@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lopes Responde Pro 2.0 — assistente inteligente.">
+  <title>Lopes Responde Pro 2.0</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#111827;--line:#273247;--text:#f8fafc;--muted:#aab5c8;--red:#a71930;--gold:#e8bd58}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+    header{padding:18px 20px;border-bottom:1px solid var(--line);background:#10172a}.wrap{width:min(860px,94%);margin:34px auto}
+    .brand{font-weight:800;font-size:21px;letter-spacing:.2px}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+    h1{font-size:clamp(25px,5vw,36px);margin:0 0 10px}.intro{color:var(--muted);line-height:1.6;margin:0 0 22px}
+    .chat{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
+    #messages{min-height:280px;max-height:52vh;overflow:auto;padding:18px}
+    .bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;padding:13px 15px;border-radius:12px;margin:0 0 12px}
+    .assistant{background:#202a3c;margin-right:7%}.user{background:#273d77;margin-left:7%}.notice{color:var(--muted);background:#172033}
+    form{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
+    textarea{font:inherit;color:var(--text);background:#0b1020;border:1px solid #3b465a;border-radius:10px;padding:13px;min-height:54px;max-height:160px;resize:vertical;flex:1;min-width:0}
+    button{border:0;border-radius:10px;background:var(--red);color:white;font:inherit;font-weight:700;padding:0 22px;min-height:50px;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait}.hint{font-size:12px;color:var(--muted);padding:0 16px 14px}footer{text-align:center;color:#7e899d;padding:24px;font-size:12px}
+    @media(max-width:540px){form{flex-direction:column}button{width:100%}.assistant{margin-right:0}.user{margin-left:0}#messages{min-height:240px}}
+  </style>
+</head>
+<body>
+<header><div class="brand">LOPES RESPONDE PRO</div><div class="sub">Versão 2.0 · Assistente inteligente</div></header>
+<main class="wrap">
+  <h1>Olá! Eu sou o Lopes.</h1>
+  <p class="intro">Este é o painel inicial do Lopes Responde Pro. Envie uma mensagem para conversar com o assistente.</p>
+  <section class="chat" aria-label="Conversa com o assistente">
+    <div id="messages" aria-live="polite">
+      <div class="bubble assistant">Olá! Estou aqui. Digite sua mensagem abaixo para começar.</div>
+    </div>
+    <form id="chatForm">
+      <textarea id="userInput" maxlength="4000" placeholder="Escreva sua mensagem..." aria-label="Sua mensagem" required></textarea>
+      <button id="sendButton" type="submit">Enviar</button>
+    </form>
+    <div class="hint">Não envie senhas, chaves de acesso ou dados bancários.</div>
+  </section>
+</main>
+<footer>Lopes Responde Pro 2.0 · Plataforma em desenvolvimento</footer>
+<script>
+const form=document.getElementById("chatForm");
+const input=document.getElementById("userInput");
+const messages=document.getElementById("messages");
+const button=document.getElementById("sendButton");
+function addMessage(text,kind){const el=document.createElement("div");el.className="bubble "+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
+form.addEventListener("submit",async(event)=>{
+  event.preventDefault();
+  const message=input.value.trim();if(!message||button.disabled)return;
+  addMessage(message,"user");input.value="";button.disabled=true;button.textContent="Aguarde...";
+  const waiting=addMessage("Estou tentando conectar ao assistente...","notice");
+  try{
+    const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});
+    const data=await response.json().catch(()=>({}));
+    waiting.remove();
+    if(!response.ok){
+      const safeText=response.status===401||response.status===503
+        ?"A conexão do chat ainda precisa ser configurada no servidor. A chave de acesso não deve ser colocada nesta página."
+        :(data.erro||"Não foi possível obter resposta do servidor. Verifique a implantação e tente novamente.");
+      addMessage(safeText,"notice");return;
+    }
+    addMessage(data.assistantMessage||data.message||"O servidor respondeu, mas não retornou texto de resposta.","assistant");
+  }catch(error){
+    waiting.remove();
+    addMessage("Não consegui alcançar o servidor. Confira se a implantação da Vercel terminou e tente novamente.","notice");
+  }finally{button.disabled=false;button.textContent="Enviar";input.focus()}
+});
+</script>
+</body>
+</html>
