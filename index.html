@@ -34,6 +34,8 @@
     @keyframes adShine{0%,55%{transform:translateX(-100%)}75%,100%{transform:translateX(100%)}}
     .ad-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8eb5a1;font-weight:800}.ad-title{font-weight:800;margin-top:5px}.ad-text{font-size:12px;color:#b8cec3;margin-top:4px;line-height:1.45}
     .ad-action{margin-top:9px;border:1px solid #3c7459;background:#153427;color:#fff;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
+    .usage-card{margin:18px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#0b1812;font-size:12px;color:#b8cec3}.usage-card strong{color:#fff}.usage-btn{margin-top:10px;border:0;border-radius:9px;background:var(--green);color:#fff;padding:9px 12px;font-weight:800;cursor:pointer}
+    .gate{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#172a22;border:1px solid #3d6a55;color:#d7e8df;line-height:1.45}
 </style>
 </head>
 <body>
@@ -81,6 +83,7 @@
         <div class="ad-text">Anúncios de comércio e serviços podem aparecer aqui no plano Social, ajudando a monetizar a versão gratuita.</div>
         <button class="ad-action" type="button" onclick="alert('Espaço publicitário do Lopes Responde Pro.')">Ver anúncio</button>
       </section>
+      <div class="usage-card" id="usageCard"><strong>Uso do Social</strong><div id="usageText">Tempo gratuito sendo contabilizado.</div><div class="gate" id="adGate">Para continuar usando esta função, assista à publicidade disponível. Depois da exibição, a função será liberada pelo período definido pelo sistema.</div><button class="usage-btn" id="watchAdButton" type="button" style="display:none">Assistir publicidade para liberar</button></div>
       <section class="chat" aria-label="Conversa com o assistente">
         <div id="messages" class="messages" aria-live="polite"><div class="bubble assistant">Olá! Estou aqui. Digite sua mensagem abaixo para começar.</div></div>
         <form id="chatForm">
@@ -118,6 +121,10 @@ document.getElementById("profileButton").onclick=()=>{
   applyPlanUI();show("app");
 };
 
+const usageStartedAt=Date.now();let totalUsageSeconds=Number(localStorage.getItem("lopes_usage_seconds")||0);let adUnlockUntil=Number(localStorage.getItem("lopes_ad_unlock_until")||0);
+function updateUsage(){if(localStorage.getItem("lopes_plan")!=="social")return;const session=Math.floor((Date.now()-usageStartedAt)/1000);const total=totalUsageSeconds+session;localStorage.setItem("lopes_usage_seconds",String(total));const m=Math.floor(total/60),s=total%60;const el=document.getElementById("usageText");if(el)el.textContent="Tempo gratuito acumulado: "+m+" min "+s+" s.";const gate=document.getElementById("adGate"),btn=document.getElementById("watchAdButton");const locked=total>=30 && Date.now()>adUnlockUntil;if(gate)gate.style.display=locked?"block":"none";if(btn)btn.style.display=locked?"inline-block":"none";}
+setInterval(updateUsage,1000);
+document.getElementById("watchAdButton").onclick=()=>{const btn=document.getElementById("watchAdButton");btn.disabled=true;btn.textContent="Publicidade em exibição...";setTimeout(()=>{adUnlockUntil=Date.now()+15*60*1000;localStorage.setItem("lopes_ad_unlock_until",String(adUnlockUntil));btn.disabled=false;btn.textContent="Assistir publicidade para liberar";updateUsage();},5000);};
 const form=document.getElementById("chatForm"),input=document.getElementById("userInput"),messages=document.getElementById("messages"),button=document.getElementById("sendButton");
 function addMessage(text,kind){const el=document.createElement("div");el.className="bubble "+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
 form.addEventListener("submit",async(event)=>{
