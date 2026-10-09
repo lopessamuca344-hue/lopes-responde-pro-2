@@ -24,7 +24,7 @@ app.get("/api/status", (req, res) => {
 const chatRoute = require("./routes/chat");
 app.post("/api/chat", chatRoute);
 
-// Controle de códigos individuais de teste (banco e autenticação externos).
+// Cadastro, login, recuperação de senha e identificação do Administrador Master.\napp.use("/api/auth", require("./routes/auth"));\n\n// Controle de códigos individuais de teste (banco e autenticação externos).
 const trialAccessRoute = require("./routes/trial-access");
 app.use("/api/trial-access", trialAccessRoute);
 
