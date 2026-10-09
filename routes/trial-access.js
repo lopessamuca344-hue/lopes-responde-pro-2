@@ -78,8 +78,26 @@ module.exports = async function trialAccessRoute(req, res) {
         headers: { Prefer: "return=minimal" },
         body: JSON.stringify(codes.map(({ email, code_hash, plans, expires_at, revoked }) => ({ email, code_hash, plans, expires_at, revoked })))
       });
+      if (process.env.RESEND_API_KEY && process.env.TRIAL_FROM_EMAIL) {
+        const emailResults = await Promise.all(codes.map(async ({ email, code, expires_at }) => {
+          try {
+            const response = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: { Authorization: "Bearer " + process.env.RESEND_API_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                from: process.env.TRIAL_FROM_EMAIL,
+                to: [email],
+                subject: "Seu código de teste — Lopes Responde Pro",
+                text: "Seu código individual é: " + code + "\\n\\nEle libera os planos Social, Pro, Executiva e Master até " + expires_at + ". Use-o somente na conta associada a este e-mail."
+              })
+            });
+            return { email, enviado: response.ok };
+          } catch (_) { return { email, enviado: false }; }
+        }));
+        return res.status(201).json({ mensagem: "Códigos criados. Confira o resultado do envio por e-mail.", validade_dias: days, emails: emailResults });
+      }
       return res.status(201).json({
-        mensagem: "10 códigos individuais foram criados. Guarde os códigos exibidos agora; eles não são armazenados em texto puro.",
+        mensagem: "10 códigos criados. Envio automático não configurado; guarde os códigos desta resposta administrativa e envie manualmente.",
         validade_dias: days,
         codigos: codes.map(({ email, code, plans, expires_at }) => ({ email, code, planos: plans, expira_em: expires_at }))
       });
