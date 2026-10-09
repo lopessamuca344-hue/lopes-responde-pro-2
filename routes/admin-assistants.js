@@ -31,7 +31,7 @@ async function masterFromRequest(req) {
 }
 
 async function findConfirmedUserByEmail(email) {
-  const base = process.env.SUPABASE_URL.replace(/\\/$/, "");
+  const base = process.env.SUPABASE_URL.replace(/\/$/, "");
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   for (let page = 1; page <= 20; page++) {
     const url = base + "/auth/v1/admin/users?page=" + page + "&per_page=1000";
