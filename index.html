@@ -3,68 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Lopes Responde Pro 2.0 — assistente inteligente.">
-  <title>Lopes Responde Pro 2.0</title>
+  <meta name="description" content="Lopes Responde Pro — seu assistente inteligente.">
+  <title>Lopes Responde Pro</title>
   <style>
-    :root{color-scheme:dark;--bg:#0b1020;--panel:#111827;--line:#273247;--text:#f8fafc;--muted:#aab5c8;--red:#a71930;--gold:#e8bd58}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-    header{padding:18px 20px;border-bottom:1px solid var(--line);background:#10172a}.wrap{width:min(860px,94%);margin:34px auto}
-    .brand{font-weight:800;font-size:21px;letter-spacing:.2px}.sub{color:var(--muted);font-size:13px;margin-top:4px}
-    h1{font-size:clamp(25px,5vw,36px);margin:0 0 10px}.intro{color:var(--muted);line-height:1.6;margin:0 0 22px}
-    .chat{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
-    #messages{min-height:280px;max-height:52vh;overflow:auto;padding:18px}
-    .bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;padding:13px 15px;border-radius:12px;margin:0 0 12px}
-    .assistant{background:#202a3c;margin-right:7%}.user{background:#273d77;margin-left:7%}.notice{color:var(--muted);background:#172033}
-    form{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
-    textarea{font:inherit;color:var(--text);background:#0b1020;border:1px solid #3b465a;border-radius:10px;padding:13px;min-height:54px;max-height:160px;resize:vertical;flex:1;min-width:0}
-    button{border:0;border-radius:10px;background:var(--red);color:white;font:inherit;font-weight:700;padding:0 22px;min-height:50px;cursor:pointer}
-    button:disabled{opacity:.6;cursor:wait}.hint{font-size:12px;color:var(--muted);padding:0 16px 14px}footer{text-align:center;color:#7e899d;padding:24px;font-size:12px}
-    @media(max-width:540px){form{flex-direction:column}button{width:100%}.assistant{margin-right:0}.user{margin-left:0}#messages{min-height:240px}}
+    :root{color-scheme:dark;--bg:#080b14;--panel:#111827;--line:#283246;--text:#f8fafc;--muted:#aab5c8;--red:#b51f38;--red2:#8e172b;--gold:#e8bd58}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+    body{min-height:100vh}.screen{min-height:100vh;display:none}.screen.active{display:flex}
+    .splash{align-items:center;justify-content:center;text-align:center;padding:28px;background:radial-gradient(circle at 50% 35%,#21101a 0,#080b14 48%)}
+    .splash-inner{width:min(520px,92%)}.logo-mark{width:92px;height:92px;border-radius:28px;margin:0 auto 24px;display:grid;place-items:center;background:linear-gradient(145deg,var(--red),var(--red2));font-weight:900;font-size:30px;box-shadow:0 18px 50px #0008}
+    .brand{font-size:27px;font-weight:900;letter-spacing:.8px}.slogan{font-size:18px;color:var(--muted);line-height:1.55;margin:12px auto 34px}
+    .primary,.google{width:100%;min-height:54px;border:0;border-radius:12px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--red);color:white}.primary:hover{background:#c32641}
+    .small{color:#7f8ba1;font-size:12px;margin-top:16px}
+    .auth{align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#0b1020,#080b14)}.card{width:min(430px,94%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 20px 70px #0007}
+    .back{background:none;border:0;color:var(--muted);padding:0;margin-bottom:22px;cursor:pointer}.card h1{font-size:27px;margin:0 0 8px}.card p{color:var(--muted);line-height:1.55}
+    .google{background:#fff;color:#202124;display:flex;align-items:center;justify-content:center;gap:10px;margin:24px 0 12px}.g{font-weight:900;font-size:20px}
+    .profile{align-items:center;justify-content:center;padding:24px;background:#080b14}.field{display:block;margin:18px 0 0;color:var(--muted);font-size:13px}.field input{display:block;width:100%;margin-top:7px;padding:14px;border-radius:11px;border:1px solid #3b465a;background:#0b1020;color:var(--text);font:inherit}
+    .app{display:flex;flex-direction:column}.topbar{padding:17px 20px;border-bottom:1px solid var(--line);background:#10172a;display:flex;justify-content:space-between;align-items:center}.topbrand{font-weight:900}.user-name{font-size:12px;color:var(--muted)}
+    .wrap{width:min(860px,94%);margin:30px auto}.welcome{margin-bottom:22px}.welcome h1{font-size:clamp(26px,5vw,36px);margin:0 0 8px}.welcome p{color:var(--muted);line-height:1.55;margin:0}
+    .chat{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}.messages{min-height:280px;max-height:52vh;overflow:auto;padding:18px}
+    .bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;padding:13px 15px;border-radius:12px;margin:0 0 12px}.assistant{background:#202a3c;margin-right:7%}.user{background:#273d77;margin-left:7%}.notice{color:var(--muted);background:#172033}
+    form{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}textarea{font:inherit;color:var(--text);background:#0b1020;border:1px solid #3b465a;border-radius:10px;padding:13px;min-height:54px;max-height:160px;resize:vertical;flex:1;min-width:0}
+    form button{border:0;border-radius:10px;background:var(--red);color:white;font:inherit;font-weight:700;padding:0 22px;min-height:50px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.hint{font-size:12px;color:var(--muted);padding:0 16px 14px}footer{text-align:center;color:#7e899d;padding:24px;font-size:12px}
+    @media(max-width:540px){form{flex-direction:column}form button{width:100%}.assistant,.user{margin-left:0;margin-right:0}.messages{min-height:240px}}
   </style>
 </head>
 <body>
-<header><div class="brand">LOPES RESPONDE PRO</div><div class="sub">Versão 2.0 · Assistente inteligente</div></header>
-<main class="wrap">
-  <h1>Olá! Eu sou o Lopes.</h1>
-  <p class="intro">Este é o painel inicial do Lopes Responde Pro. Envie uma mensagem para conversar com o assistente.</p>
-  <section class="chat" aria-label="Conversa com o assistente">
-    <div id="messages" aria-live="polite">
-      <div class="bubble assistant">Olá! Estou aqui. Digite sua mensagem abaixo para começar.</div>
+  <section id="splash" class="screen splash active">
+    <div class="splash-inner">
+      <div class="logo-mark">L</div>
+      <div class="brand">LOPES RESPONDE PRO</div>
+      <div class="slogan">Seu assistente inteligente para organizar, conversar e facilitar o seu dia.</div>
+      <button class="primary" id="startButton">Começar</button>
+      <div class="small">Versão 2.0 · Assistente inteligente</div>
     </div>
-    <form id="chatForm">
-      <textarea id="userInput" maxlength="4000" placeholder="Escreva sua mensagem..." aria-label="Sua mensagem" required></textarea>
-      <button id="sendButton" type="submit">Enviar</button>
-    </form>
-    <div class="hint">Não envie senhas, chaves de acesso ou dados bancários.</div>
   </section>
-</main>
-<footer>Lopes Responde Pro 2.0 · Plataforma em desenvolvimento</footer>
+
+  <section id="login" class="screen auth">
+    <div class="card">
+      <button class="back" data-back="splash">← Voltar</button>
+      <h1>Bem-vindo ao Lopes</h1>
+      <p>Entre para continuar e configurar seu perfil.</p>
+      <button class="google" id="googleButton"><span class="g">G</span> Entrar com Google</button>
+      <div class="small">Seu acesso será usado para identificar seu perfil no aplicativo.</div>
+    </div>
+  </section>
+
+  <section id="profile" class="screen profile">
+    <div class="card">
+      <h1>Configure seu perfil</h1>
+      <p>É só informar como você quer ser chamado dentro do Lopes Responde Pro.</p>
+      <label class="field">Seu nome
+        <input id="profileName" maxlength="80" autocomplete="name" placeholder="Digite seu nome">
+      </label>
+      <button class="primary" id="profileButton" style="margin-top:22px">Continuar</button>
+    </div>
+  </section>
+
+  <section id="app" class="screen app">
+    <header class="topbar"><div class="topbrand">LOPES RESPONDE PRO</div><div class="user-name" id="userName"></div></header>
+    <main class="wrap">
+      <div class="welcome"><h1 id="welcomeTitle">Olá! Eu sou o Lopes.</h1><p>Agora você está na tela principal. Envie uma mensagem para conversar com o assistente.</p></div>
+      <section class="chat" aria-label="Conversa com o assistente">
+        <div id="messages" class="messages" aria-live="polite"><div class="bubble assistant">Olá! Estou aqui. Digite sua mensagem abaixo para começar.</div></div>
+        <form id="chatForm">
+          <textarea id="userInput" maxlength="4000" placeholder="Escreva sua mensagem..." aria-label="Sua mensagem" required></textarea>
+          <button id="sendButton" type="submit">Enviar</button>
+        </form>
+        <div class="hint">Não envie senhas, chaves de acesso ou dados bancários.</div>
+      </section>
+    </main>
+    <footer>Lopes Responde Pro · Plataforma em desenvolvimento</footer>
+  </section>
+
 <script>
-const form=document.getElementById("chatForm");
-const input=document.getElementById("userInput");
-const messages=document.getElementById("messages");
-const button=document.getElementById("sendButton");
+const screens=["splash","login","profile","app"];
+function show(id){screens.forEach(x=>document.getElementById(x).classList.toggle("active",x===id));}
+document.getElementById("startButton").onclick=()=>show("login");
+document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>show(b.dataset.back));
+
+document.getElementById("googleButton").onclick=()=>{
+  // A tela de autenticação fica separada do cadastro. A integração real do Google
+  // pode ser conectada sem alterar o fluxo da aplicação.
+  show("profile");
+};
+
+document.getElementById("profileButton").onclick=()=>{
+  const name=document.getElementById("profileName").value.trim();
+  if(!name){document.getElementById("profileName").focus();return;}
+  document.getElementById("userName").textContent=name;
+  document.getElementById("welcomeTitle").textContent="Olá, "+name+"!";
+  show("app");
+};
+
+const form=document.getElementById("chatForm"),input=document.getElementById("userInput"),messages=document.getElementById("messages"),button=document.getElementById("sendButton");
 function addMessage(text,kind){const el=document.createElement("div");el.className="bubble "+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
 form.addEventListener("submit",async(event)=>{
-  event.preventDefault();
-  const message=input.value.trim();if(!message||button.disabled)return;
+  event.preventDefault();const message=input.value.trim();if(!message||button.disabled)return;
   addMessage(message,"user");input.value="";button.disabled=true;button.textContent="Aguarde...";
   const waiting=addMessage("Estou tentando conectar ao assistente...","notice");
   try{
     const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});
-    const data=await response.json().catch(()=>({}));
-    waiting.remove();
-    if(!response.ok){
-      const safeText=response.status===401||response.status===503
-        ?"A conexão do chat ainda precisa ser configurada no servidor. A chave de acesso não deve ser colocada nesta página."
-        :(data.erro||"Não foi possível obter resposta do servidor. Verifique a implantação e tente novamente.");
-      addMessage(safeText,"notice");return;
-    }
+    const data=await response.json().catch(()=>({}));waiting.remove();
+    if(!response.ok){addMessage(data.erro||"Não foi possível obter resposta do servidor.","notice");return}
     addMessage(data.assistantMessage||data.message||"O servidor respondeu, mas não retornou texto de resposta.","assistant");
-  }catch(error){
-    waiting.remove();
-    addMessage("Não consegui alcançar o servidor. Confira se a implantação da Vercel terminou e tente novamente.","notice");
-  }finally{button.disabled=false;button.textContent="Enviar";input.focus()}
+  }catch(error){waiting.remove();addMessage("Não consegui alcançar o servidor. Confira a implantação e tente novamente.","notice")}
+  finally{button.disabled=false;button.textContent="Enviar";input.focus()}
 });
 </script>
 </body>
