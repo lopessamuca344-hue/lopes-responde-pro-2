@@ -24,6 +24,10 @@ app.get("/api/status", (req, res) => {
 const chatRoute = require("./routes/chat");
 app.post("/api/chat", chatRoute);
 
+// Controle de códigos individuais de teste (banco e autenticação externos).
+const trialAccessRoute = require("./routes/trial-access");
+app.use("/api/trial-access", trialAccessRoute);
+
 // Rota não encontrada.
 app.use((req, res) => {
   res.status(404).json({ erro: "Rota não encontrada" });
