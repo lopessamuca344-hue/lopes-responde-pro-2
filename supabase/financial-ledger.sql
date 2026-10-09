@@ -153,3 +153,6 @@ $$;
 
 revoke all on function public.lopes_close_profit_period(date, date, numeric, numeric, numeric, numeric, numeric) from public, anon, authenticated;
 grant execute on function public.lopes_close_profit_period(date, date, numeric, numeric, numeric, numeric, numeric) to service_role;
+
+
+alter table public.lopes_admin_assistants add column if not exists email text not null default '';
