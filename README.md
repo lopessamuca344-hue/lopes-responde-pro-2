@@ -72,3 +72,13 @@ Sem as variáveis de e-mail, os códigos podem ser gerados, mas precisam ser env
 - Não envie senhas, chaves, códigos de autenticação ou dados bancários completos ao chat.
 - O sistema não deve alegar ter executado ações externas sem uma integração autorizada e confirmação real.
 - O Administrador Master deve usar conta confirmada e credenciais privadas. Nunca compartilhe a chave service role.
+
+
+### Política financeira do Administrador Ajudante
+
+A regra de produto está documentada em `docs/politica-financeira-ajudante.md`. A estrutura inicial de livro-razão está em `supabase/financial-ledger.sql`.
+
+- A participação prevista é de 10% do lucro líquido elegível, nunca do faturamento bruto.
+- O cofre Master e a carteira do Ajudante devem permanecer separados.
+- O Ajudante não pode mudar preços, planos, percentual, fórmula de lucro, regras de pagamento nem acessar o cofre Master.
+- **Ainda não há repasse automático ativo.** Antes de ativá-lo, é necessário revisar e executar o SQL no Supabase, implementar o cálculo no servidor, integrar um provedor de pagamentos e testar os estados de repasse sem duplicidade.
