@@ -21,7 +21,7 @@ async function generateAIResponse(message) {
   }
 
   const adminInstructions = await getAdminControlInstructions();
-  const systemInstructions = adminInstructions ? SYSTEM_INSTRUCTIONS + "\\n\\n" + adminInstructions : SYSTEM_INSTRUCTIONS;
+  const systemInstructions = adminInstructions ? SYSTEM_INSTRUCTIONS + "\n\n" + adminInstructions : SYSTEM_INSTRUCTIONS;
 
   if ((process.env.AI_PROVIDER || "").toLowerCase() === "openai") {
     const apiKey = process.env.OPENAI_API_KEY;
