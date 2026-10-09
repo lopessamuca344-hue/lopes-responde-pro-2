@@ -30,7 +30,10 @@ app.use("/api/auth", require("./routes/auth"));
 // Controles privados de integração e revogação do Administrador Master.
 app.use("/api/admin/controls", require("./routes/admin-controls"));
 
-// Administração privada dos candidatos e do único Administrador Ajudante.\napp.use("/api/admin/assistants", require("./routes/admin-assistants"));\n\n// Controle de códigos individuais de teste (banco e autenticação externos).
+// Administração privada dos candidatos e do único Administrador Ajudante.
+app.use("/api/admin/assistants", require("./routes/admin-assistants"));
+
+// Controle de códigos individuais de teste (banco e autenticação externos).
 const trialAccessRoute = require("./routes/trial-access");
 app.use("/api/trial-access", trialAccessRoute);
 
