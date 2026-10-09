@@ -71,14 +71,14 @@ async function generateAIResponse(message) {
   }
 
   // API Interactions oficial, recomendada pelo Google para novos projetos.
-  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
   let response;
   let data;
 
   try {
-    response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+    response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -86,10 +86,8 @@ async function generateAIResponse(message) {
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model,
-        input: message.trim(),
-        system_instruction: systemInstructions,
-        store: false
+        contents: [{ role: "user", parts: [{ text: message.trim() }] }],
+        systemInstruction: { parts: [{ text: systemInstructions }] }
       })
     });
     data = await response.json().catch(() => ({}));
@@ -120,9 +118,7 @@ async function generateAIResponse(message) {
     throw error;
   }
 
-  const assistantMessage = (data?.steps || [])
-    .filter((step) => step?.type === "model_output")
-    .flatMap((step) => step?.content || [])
+  const assistantMessage = (data?.candidates?.[0]?.content?.parts || [])
     .map((part) => part?.text || "")
     .join("")
     .trim();
