@@ -139,6 +139,41 @@
         <button class="danger-btn" id="revokeAllIntegrations" type="button">Revogar todas as permissões de integração</button>
         <div id="controlsStatus" role="status" style="font-size:13px;color:#e8bd58;margin-top:10px">Os controles precisam do banco Supabase configurado.</div>
       </div>
+      <div style="margin-top:18px;padding:15px;border:1px solid #294338;border-radius:12px">
+        <strong>Administrador Ajudante</strong>
+        <p style="font-size:13px">Cadastre até dez contas já confirmadas. Apenas uma pode ficar ativa. As permissões disponíveis são limitadas e não incluem o cofre nem regras financeiras.</p>
+        <label class="field">Nome do candidato<input id="assistantCandidateName" maxlength="100" placeholder="Nome para identificação"></label>
+        <label class="field" style="margin-top:8px">E-mail cadastrado e confirmado<input id="assistantCandidateEmail" type="email" placeholder="pessoa@email.com"></label>
+        <button class="primary" id="addAssistantCandidate" type="button" style="margin-top:10px">Adicionar candidato</button>
+        <div id="assistantCandidateStatus" role="status" style="font-size:13px;color:#e8bd58;margin-top:10px"></div>
+        <div style="margin-top:12px;font-size:13px">Permissões a conceder ao Ajudante selecionado:</div>
+        <div id="assistantPermissionControls" style="display:grid;gap:8px;margin:10px 0">
+          <label class="control-check"><input type="checkbox" data-assistant-permission="support_review"> Revisão de atendimento</label>
+          <label class="control-check"><input type="checkbox" data-assistant-permission="content_moderation"> Moderação de conteúdo</label>
+          <label class="control-check"><input type="checkbox" data-assistant-permission="tester_management"> Gestão de testadores</label>
+          <label class="control-check"><input type="checkbox" data-assistant-permission="user_feedback"> Feedback dos usuários</label>
+          <label class="control-check"><input type="checkbox" data-assistant-permission="basic_analytics"> Estatísticas básicas</label>
+        </div>
+        <button class="primary" id="saveAssistantPermissions" type="button">Salvar permissões do Ajudante ativo</button>
+        <div id="assistantCandidatesList" style="display:grid;gap:8px;margin-top:12px"></div>
+      </div>
+      <div style="margin-top:18px;padding:15px;border:1px solid #294338;border-radius:12px">
+        <strong>Livro-razão financeiro</strong>
+        <p style="font-size:13px">Registra o lucro líquido do período e calcula os 10% devidos ao Ajudante ativo. Este painel não transfere dinheiro. Use apenas valores conferidos; não é uma integração automática com banco ou checkout.</p>
+        <label class="field">Início do período<input id="financePeriodStart" type="date"></label>
+        <label class="field" style="margin-top:8px">Fim do período<input id="financePeriodEnd" type="date"></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <label class="field">Receita bruta<input id="financeGrossRevenue" type="number" min="0" step="0.01" value="0"></label>
+          <label class="field">Taxas<input id="financeFees" type="number" min="0" step="0.01" value="0"></label>
+          <label class="field">Reembolsos/estornos<input id="financeRefunds" type="number" min="0" step="0.01" value="0"></label>
+          <label class="field">Impostos<input id="financeTaxes" type="number" min="0" step="0.01" value="0"></label>
+          <label class="field" style="grid-column:1/-1">Custos operacionais elegíveis<input id="financeCosts" type="number" min="0" step="0.01" value="0"></label>
+        </div>
+        <button class="primary" id="closeFinancePeriod" type="button" style="margin-top:12px">Registrar período e calcular 10%</button>
+        <button class="google" id="refreshFinance" type="button" style="margin-top:8px">Atualizar registros</button>
+        <div id="financeStatus" role="status" style="font-size:13px;color:#e8bd58;margin-top:10px">Financeiro ainda não consultado.</div>
+        <pre id="financeResults" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:320px;overflow:auto"></pre>
+      </div>
       <button class="primary" id="adminContinue" style="margin-top:18px">Abrir o assistente</button>
       <button class="google" id="logoutButton" style="margin-top:10px">Sair da conta</button>
     </div>
