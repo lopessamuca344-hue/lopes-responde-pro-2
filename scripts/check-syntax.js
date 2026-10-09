@@ -10,6 +10,7 @@ const sourceFiles = [
   "routes/chat.js",
   "routes/auth.js",
   "routes/admin-controls.js",
+  "routes/admin-assistants.js",
   "routes/trial-access.js"
 ];
 
