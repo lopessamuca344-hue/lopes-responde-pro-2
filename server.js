@@ -33,6 +33,9 @@ app.use("/api/admin/controls", require("./routes/admin-controls"));
 // Administração privada dos candidatos e do único Administrador Ajudante.
 app.use("/api/admin/assistants", require("./routes/admin-assistants"));
 
+// Consulta e fechamento de períodos financeiros; não executa transferências.
+app.use("/api/admin/finance", require("./routes/admin-finance"));
+
 // Controle de códigos individuais de teste (banco e autenticação externos).
 const trialAccessRoute = require("./routes/trial-access");
 app.use("/api/trial-access", trialAccessRoute);
