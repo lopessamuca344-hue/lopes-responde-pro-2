@@ -23,10 +23,10 @@ module.exports = async (req, res) => {
       return res.status(503).json({ erro: "A IA não está configurada: falta GEMINI_API_KEY no ambiente Production da Vercel." });
     }
     if (code === "GEMINI_HTTP_401" || code === "GEMINI_HTTP_403") {
-      return res.status(502).json({ erro: "O Google recusou a chave ou a permissão da API. Em outubro de 2026, confira se a chave Gemini é do tipo de autorização (Auth), não uma chave padrão antiga, e se tem acesso à API Gemini." });
+      return res.status(502).json({ erro: "O Google recusou a autenticação ou a permissão da API Gemini. Confira nos registros da função o motivo retornado pelo Google; não é necessário criar outra chave antes dessa verificação." });
     }
     if (code === "GEMINI_HTTP_404") {
-      return res.status(502).json({ erro: "O Google não encontrou o modelo ou recurso solicitado. Confirme a variável GEMINI_MODEL; o padrão atual deste sistema é gemini-3.8-flash." });
+      return res.status(502).json({ erro: "O Google não encontrou o modelo ou recurso solicitado. Confirme GEMINI_MODEL; o padrão é gemini-3.8-flash." });
     }
     if (code === "GEMINI_HTTP_400") {
       return res.status(502).json({ erro: "O Google rejeitou o formato da solicitação. Consulte os registros técnicos da Vercel para identificar o motivo." });
