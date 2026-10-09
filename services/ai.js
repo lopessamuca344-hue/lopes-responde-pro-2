@@ -24,6 +24,8 @@ async function generateAIResponse(message) {
     throw error;
   }
 
+  // Modelo estável atual. Pode ser substituído sem alterar o código usando GEMINI_MODEL.
+  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
   let response;
@@ -31,7 +33,7 @@ async function generateAIResponse(message) {
 
   try {
     response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       {
         method: "POST",
         headers: {
@@ -65,11 +67,13 @@ async function generateAIResponse(message) {
     console.error("Gemini API falhou:", JSON.stringify({
       status: response.status,
       statusText: response.statusText,
+      model,
       message: providerMessage
     }));
 
     const error = new Error("Gemini API respondeu com status " + response.status);
     error.code = "GEMINI_HTTP_" + response.status;
+    error.providerMessage = providerMessage;
     throw error;
   }
 
@@ -80,6 +84,7 @@ async function generateAIResponse(message) {
 
   if (!assistantMessage) {
     console.error("Gemini não retornou texto:", JSON.stringify({
+      model,
       promptFeedback: data?.promptFeedback?.blockReason || null,
       candidateFinishReason: data?.candidates?.[0]?.finishReason || null
     }));
