@@ -1,0 +1,23 @@
+name: Validate Node.js syntax
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check server and route syntax
+        run: |
+          node --check server.js
+          node --check routes/chat.js
+          node --check routes/trial-access.js
+          node --check services/chat.js
+          node --check services/ai.js
