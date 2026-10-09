@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       return res.status(502).json({ erro: "O Google recusou a autenticação ou a permissão da API Gemini. Confira nos registros da função o motivo retornado pelo Google; não é necessário criar outra chave antes dessa verificação." });
     }
     if (code === "GEMINI_HTTP_404") {
-      return res.status(502).json({ erro: "O Google não encontrou o modelo ou recurso solicitado. Confirme GEMINI_MODEL; o padrão é gemini-3.8-flash." });
+      return res.status(502).json({ erro: "O Google não encontrou o modelo ou recurso solicitado. Confirme GEMINI_MODEL; o padrão é gemini-2.5-flash." });
     }
     if (code === "GEMINI_HTTP_400") {
       return res.status(502).json({ erro: "O Google rejeitou o formato da solicitação. Consulte os registros técnicos da Vercel para identificar o motivo." });
@@ -42,6 +42,12 @@ module.exports = async (req, res) => {
     }
     if (code === "GEMINI_TIMEOUT") {
       return res.status(504).json({ erro: "O Gemini demorou demais para responder. Tente novamente em instantes." });
+    }
+    if (code === "GEMINI_NETWORK") {
+      return res.status(502).json({ erro: "Não foi possível alcançar a API Gemini. Verifique a conexão do servidor e tente novamente." });
+    }
+    if (code === "GEMINI_EMPTY_RESPONSE") {
+      return res.status(502).json({ erro: "O Gemini respondeu sem texto. Tente novamente; se persistir, confira o modelo e os registros técnicos." });
     }
     return res.status(502).json({ erro: "Não foi possível obter resposta da IA. Consulte os registros técnicos da Vercel para identificar a causa." });
   }
