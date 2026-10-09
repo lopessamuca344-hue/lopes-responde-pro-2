@@ -82,3 +82,13 @@ A regra de produto está documentada em `docs/politica-financeira-ajudante.md`. 
 - O cofre Master e a carteira do Ajudante devem permanecer separados.
 - O Ajudante não pode mudar preços, planos, percentual, fórmula de lucro, regras de pagamento nem acessar o cofre Master.
 - **Ainda não há repasse automático ativo.** Antes de ativá-lo, é necessário revisar e executar o SQL no Supabase, implementar o cálculo no servidor, integrar um provedor de pagamentos e testar os estados de repasse sem duplicidade.
+
+### Administrador Ajudante e financeiro
+
+- API privada do Ajudante: `/api/admin/assistants`. Use sessão Supabase válida do Master no cabeçalho `Authorization: Bearer <access_token>`. Ações POST: `candidate`, `select`, `permissions` e `revoke`.
+- API privada do financeiro: `/api/admin/finance`. GET consulta períodos e obrigações registradas; POST fecha um período e calcula a participação prevista de 10%.
+- O endpoint financeiro exige que exista um Ajudante ativo. Ele registra a obrigação como `pending`; **não faz transferência bancária nem marca pagamentos como concluídos**.
+- Antes de usar essas rotas, execute `supabase/financial-ledger.sql` no SQL Editor do Supabase. Não cole a chave `SUPABASE_SERVICE_ROLE_KEY` no navegador, no GitHub ou no chat.
+- O período é único por data inicial/final. Se já estiver registrado, o sistema recusa a duplicação.
+- Os valores de receita, taxas, reembolsos/estornos, impostos e custos elegíveis precisam vir de registros financeiros conferidos. Enquanto não houver integração com o provedor de pagamentos, o preenchimento é administrativo e não deve ser tratado como contabilidade automática.
+- A implantação do GitHub/Vercel e a execução do SQL no Supabase são etapas separadas. Depois do commit, confira o resultado do deploy e só então teste as rotas com a conta Master.
