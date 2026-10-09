@@ -24,7 +24,7 @@ async function generateAIResponse(message) {
     throw error;
   }
 
-  // Modelo estável atual. Pode ser substituído sem alterar o código usando GEMINI_MODEL.
+  // API Interactions oficial, recomendada pelo Google para novos projetos.
   const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
@@ -32,22 +32,20 @@ async function generateAIResponse(message) {
   let data;
 
   try {
-    response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        signal: controller.signal,
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTIONS }] },
-          contents: [{ role: "user", parts: [{ text: message.trim() }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
-        })
-      }
-    );
+    response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        input: message.trim(),
+        system_instruction: SYSTEM_INSTRUCTIONS,
+        store: false
+      })
+    });
     data = await response.json().catch(() => ({}));
   } catch (error) {
     if (error?.name === "AbortError") {
@@ -66,7 +64,6 @@ async function generateAIResponse(message) {
     const providerMessage = data?.error?.message || "Sem detalhes do provedor";
     console.error("Gemini API falhou:", JSON.stringify({
       status: response.status,
-      statusText: response.statusText,
       model,
       message: providerMessage
     }));
@@ -77,16 +74,18 @@ async function generateAIResponse(message) {
     throw error;
   }
 
-  const assistantMessage = data?.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text || "")
+  const assistantMessage = (data?.steps || [])
+    .filter((step) => step?.type === "model_output")
+    .flatMap((step) => step?.content || [])
+    .map((part) => part?.text || "")
     .join("")
     .trim();
 
   if (!assistantMessage) {
     console.error("Gemini não retornou texto:", JSON.stringify({
       model,
-      promptFeedback: data?.promptFeedback?.blockReason || null,
-      candidateFinishReason: data?.candidates?.[0]?.finishReason || null
+      status: data?.status || null,
+      steps: Array.isArray(data?.steps) ? data.steps.map((step) => step?.type) : []
     }));
     const error = new Error("A IA não retornou uma resposta válida");
     error.code = "GEMINI_EMPTY_RESPONSE";
