@@ -70,7 +70,7 @@ async function generateAIResponse(message) {
     throw error;
   }
 
-  // API Interactions oficial, recomendada pelo Google para novos projetos.
+  // Chamada Gemini generateContent com formato compatível com a API REST estável.
   const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
@@ -78,7 +78,7 @@ async function generateAIResponse(message) {
   let data;
 
   try {
-    response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent", {
+    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
