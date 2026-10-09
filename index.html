@@ -52,101 +52,79 @@
   <section id="login" class="screen auth">
     <div class="card">
       <button class="back" data-back="splash">← Voltar</button>
-      <h1>Bem-vindo ao Lopes</h1>
-      <p>Entre para continuar e configurar seu perfil.</p>
-      <button class="google" id="googleButton"><span class="g">G</span> Entrar com Google</button>
-      <button class="google" id="emailButton" style="background:#172a22;color:#f8fafc">✉ Entrar com e-mail e senha</button>
-      <button class="google" id="phoneButton" style="background:#172a22;color:#f8fafc">☎ Entrar com celular e senha</button>
-      <button class="google" id="appleButton" style="background:#f4f4f4;color:#111"> Entrar com Apple</button>
-      <div class="small">Demonstração: os botões de login ainda não autenticam contas reais. O login precisa ser conectado antes do lançamento.</div>
+      <h1>Acesse sua conta</h1>
+      <p>Entre com seu e-mail e senha, ou crie sua conta. Não compartilhe sua senha com ninguém.</p>
+      <form id="authForm" style="display:block;padding:0;border:0">
+        <label class="field">E-mail
+          <input id="authEmail" type="email" autocomplete="email" required placeholder="seu@email.com">
+        </label>
+        <label class="field">Senha
+          <input id="authPassword" type="password" autocomplete="current-password" minlength="10" required placeholder="Pelo menos 10 caracteres">
+        </label>
+        <button class="primary" id="loginButton" type="submit" style="margin-top:22px">Entrar</button>
+      </form>
+      <button class="google" id="signupButton" style="background:#172a22;color:#f8fafc">Criar conta com este e-mail</button>
+      <button class="back" id="recoverButton" style="margin-top:14px">Esqueci minha senha · enviar recuperação por e-mail</button>
+      <p id="authNotice" role="status" style="font-size:13px;overflow-wrap:anywhere"></p>
+      <div class="small">O cadastro e a recuperação dependem de a autenticação estar configurada no servidor.</div>
     </div>
-  </section>
-
-  <section id="profile" class="screen profile">
-    <div class="card">
-      <h1>Configure seu perfil</h1>
-      <p>É só informar como você quer ser chamado dentro do Lopes Responde Pro.</p>
-      <label class="field">Seu nome
-        <input id="profileName" maxlength="80" autocomplete="name" placeholder="Digite seu nome">
-      </label>
-      <button class="primary" id="profileButton" style="margin-top:22px">Continuar</button>
-    </div>
-  </section>
-
-  <section id="app" class="screen app">
-    <header class="topbar"><div class="topbrand">LOPES RESPONDE PRO</div><div class="user-name" id="userName"></div></header>
-    <main class="wrap">
-      <div class="welcome"><h1 id="welcomeTitle">Olá! Eu sou o Lopes.</h1><p>Você está na Versão Social gratuita. Envie uma mensagem para conversar com o assistente.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="padding:7px 10px;border-radius:999px;background:#153427;border:1px solid var(--line);font-size:11px">Plano: Social · Gratuito</span><span style="padding:7px 10px;border-radius:999px;background:#153427;border:1px solid var(--line);font-size:11px">WhatsApp: básico</span></div></div>
-      <section id="socialAd" class="ad-slot" aria-label="Publicidade">
-        <div class="ad-label">Publicidade · Plano Social</div>
-        <div class="ad-title">Espaço para parceiros e ofertas</div>
-        <div class="ad-text">Anúncios de comércio e serviços podem aparecer aqui no plano Social, ajudando a monetizar a versão gratuita.</div>
-        <button class="ad-action" type="button" onclick="alert('Espaço publicitário do Lopes Responde Pro.')">Ver anúncio</button>
-      </section>
-      <div class="usage-card" id="usageCard"><strong>Uso do Social</strong><div id="usageText">Tempo gratuito sendo contabilizado.</div><div class="gate" id="adGate">Para continuar usando esta função, assista à publicidade disponível. Depois da exibição, a função será liberada pelo período definido pelo sistema.</div><button class="usage-btn" id="watchAdButton" type="button" style="display:none">Assistir publicidade para liberar</button></div>
-      <section class="chat" aria-label="Conversa com o assistente">
-        <div id="messages" class="messages" aria-live="polite"><div class="bubble assistant">Olá! Estou aqui. Digite sua mensagem abaixo para começar.</div></div>
-        <form id="chatForm">
-          <textarea id="userInput" maxlength="4000" placeholder="Escreva sua mensagem..." aria-label="Sua mensagem" required></textarea>
-          <button id="sendButton" type="submit">Enviar</button>
-        </form>
-        <div class="hint">Não envie senhas, chaves de acesso ou dados bancários.</div>
-      </section>
-    <div style="margin-top:18px;padding:15px;border:1px dashed #46685a;border-radius:14px;background:#0b1812;font-size:12px;color:#b8cec3"><strong style="color:#fff">Níveis:</strong> Social (gratuita) · Pro (profissional) · Executiva (avançada) · Master (empresarial). <strong style="color:#fff">Administrador:</strong> função exclusiva para gestão e crescimento do sistema.</div>
-    </main><footer>Lopes Responde Pro · Plataforma em desenvolvimento</footer>
-  </section>
-
-<script>
-const screens=["splash","login","profile","app"];
-function show(id){screens.forEach(x=>document.getElementById(x).classList.toggle("active",x===id));if(id==="app")applyPlanUI();}
-document.getElementById("startButton").onclick=()=>show("login");
-document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>show(b.dataset.back));
-
-["googleButton","emailButton","phoneButton","appleButton"].forEach(id=>{
-  document.getElementById(id).onclick=()=>{
-    // No protótipo, qualquer método escolhido segue para a configuração do perfil.
-    // A autenticação real de cada provedor pode ser conectada posteriormente.
-    show("profile");
-  };
+  </section>let authSession = localStorage.getItem("lopes_auth_token") || "";
+async function authRequest(action, body) {
+  const notice = document.getElementById("authNotice");
+  notice.textContent = "Conectando com segurança…";
+  try {
+    const response = await fetch("/api/auth/" + action, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.erro || "Não foi possível concluir a solicitação.");
+    notice.textContent = data.mensagem || "Solicitação concluída.";
+    return data;
+  } catch (e) { notice.textContent = e.message || "Falha de conexão."; return null; }
+}
+async function enterAuthenticatedAccount(token) {
+  authSession = token;
+  localStorage.setItem("lopes_auth_token", token);
+  try {
+    const response = await fetch("/api/auth/me", { headers: { Authorization: "Bearer " + token } });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.erro || "Sessão inválida.");
+    if (!data.emailConfirmado) { document.getElementById("authNotice").textContent = "Confirme seu e-mail antes de continuar."; return; }
+    if (data.isAdmin) {
+      document.getElementById("adminEmail").textContent = data.email;
+      document.getElementById("adminSetupStatus").textContent = "Conta reconhecida como Administrador Master. Para ativar convites, configure Supabase e a tabela trial_access_codes.";
+      show("admin");
+    } else {
+      document.getElementById("authNotice").textContent = "";
+      show("profile");
+    }
+  } catch (e) {
+    localStorage.removeItem("lopes_auth_token"); authSession = "";
+    document.getElementById("authNotice").textContent = e.message || "Não foi possível validar a conta.";
+  }
+}
+document.getElementById("authForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const data = await authRequest("login", { email, password });
+  if (data && data.access_token) await enterAuthenticatedAccount(data.access_token);
 });
-
-function applyPlanUI(){const plan=localStorage.getItem("lopes_plan")||"social";const ad=document.getElementById("socialAd");if(ad)ad.style.display=plan==="social"?"block":"none";const badge=document.querySelector(".welcome span");if(badge)badge.textContent="Plano: "+(plan==="social"?"Social · Gratuito":plan.charAt(0).toUpperCase()+plan.slice(1));}
-document.getElementById("profileButton").onclick=()=>{
-  const name=document.getElementById("profileName").value.trim();
-  if(!name){document.getElementById("profileName").focus();return;}
-  localStorage.setItem("lopes_profile",name);localStorage.setItem("lopes_plan","social");
-  document.getElementById("userName").textContent=name+" · Social";
-  document.getElementById("welcomeTitle").textContent="Olá, "+name+"!";
-  applyPlanUI();show("app");
+document.getElementById("signupButton").onclick = async () => {
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  if (!email || password.length < 10) { document.getElementById("authNotice").textContent = "Preencha o e-mail e crie uma senha com pelo menos 10 caracteres."; return; }
+  await authRequest("signup", { email, password });
 };
-
-const usageStartedAt=Date.now();
-let totalUsageSeconds=Number(localStorage.getItem("lopes_usage_seconds")||0);
-let adUnlockUntil=Number(localStorage.getItem("lopes_ad_unlock_until")||0);
-let adPhase=Math.min(3,Math.max(1,Number(localStorage.getItem("lopes_ad_phase")||1)));
-let phaseAdCount=Number(localStorage.getItem("lopes_phase_ad_count")||0);
-const AD_PHASES=[{seconds:10,requiredAds:5,requiredUsageSeconds:600},{seconds:30,requiredAds:5,requiredUsageSeconds:1800},{seconds:35,requiredAds:Infinity,requiredUsageSeconds:Infinity}];
-function getUsageTotal(){return totalUsageSeconds+Math.floor((Date.now()-usageStartedAt)/1000);}
-function qualifyAdPhase(total){const rule=AD_PHASES[adPhase-1];if(adPhase<3&&(phaseAdCount>=rule.requiredAds||total>=rule.requiredUsageSeconds)){adPhase++;phaseAdCount=0;localStorage.setItem("lopes_ad_phase",String(adPhase));localStorage.setItem("lopes_phase_ad_count","0");}}
-function updateUsage(){if(localStorage.getItem("lopes_plan")!=="social")return;const total=getUsageTotal();localStorage.setItem("lopes_usage_seconds",String(total));qualifyAdPhase(total);const m=Math.floor(total/60),s=total%60;const el=document.getElementById("usageText");if(el)el.textContent="Uso acumulado: "+m+" min "+s+" s · Fase de publicidade "+adPhase+" ("+AD_PHASES[adPhase-1].seconds+" s).";const gate=document.getElementById("adGate"),btn=document.getElementById("watchAdButton");const locked=total>=30&&Date.now()>adUnlockUntil;if(gate)gate.style.display=locked?"block":"none";if(btn){btn.style.display=locked?"inline-block":"none";if(!btn.disabled)btn.textContent="Assistir publicidade de "+AD_PHASES[adPhase-1].seconds+" segundos para liberar";}}
-setInterval(updateUsage,1000);
-document.getElementById("watchAdButton").onclick=()=>{const btn=document.getElementById("watchAdButton");const duration=AD_PHASES[adPhase-1].seconds;btn.disabled=true;btn.textContent="Publicidade em exibição · "+duration+" s...";setTimeout(()=>{phaseAdCount++;localStorage.setItem("lopes_phase_ad_count",String(phaseAdCount));adUnlockUntil=Date.now()+15*60*1000;localStorage.setItem("lopes_ad_unlock_until",String(adUnlockUntil));qualifyAdPhase(getUsageTotal());btn.disabled=false;updateUsage();},duration*1000);};
-const form=document.getElementById("chatForm"),input=document.getElementById("userInput"),messages=document.getElementById("messages"),button=document.getElementById("sendButton");
-function addMessage(text,kind){const el=document.createElement("div");el.className="bubble "+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
-form.addEventListener("submit",async(event)=>{
-  event.preventDefault();const message=input.value.trim();if(!message||button.disabled)return;
-  addMessage(message,"user");input.value="";button.disabled=true;button.textContent="Aguarde...";
-  const waiting=addMessage("Estou tentando conectar ao assistente...","notice");
-  try{
-    const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});
-    const data=await response.json().catch(()=>({}));waiting.remove();
-    if(!response.ok){addMessage(data.erro||"Não foi possível obter resposta do servidor.","notice");return}
-    addMessage(data.assistantMessage||data.message||"O servidor respondeu, mas não retornou texto de resposta.","assistant");
-  }catch(error){waiting.remove();addMessage("Não consegui alcançar o servidor. Confira a implantação e tente novamente.","notice")}
-  finally{button.disabled=false;button.textContent="Enviar";input.focus()}
-});
-</script>
-
-<script>window.addEventListener("DOMContentLoaded",()=>{const savedName=localStorage.getItem("lopes_profile");if(savedName){document.getElementById("userName").textContent=savedName+" · "+(localStorage.getItem("lopes_plan")==="social"?"Social":"Plano");document.getElementById("welcomeTitle").textContent="Olá, "+savedName+"!";show("app");applyPlanUI();updateUsage();}});</script>
-</body>
-</html>
+document.getElementById("recoverButton").onclick = async () => {
+  const email = document.getElementById("authEmail").value.trim();
+  if (!email) { document.getElementById("authNotice").textContent = "Digite seu e-mail no campo acima."; return; }
+  await authRequest("recover", { email });
+};
+document.getElementById("adminContinue").onclick = () => {
+  const name = localStorage.getItem("lopes_profile") || "Administrador Master";
+  document.getElementById("userName").textContent = name + " · Master";
+  document.getElementById("welcomeTitle").textContent = "Olá! Eu sou o Lopes.";
+  show("app");
+};
+document.getElementById("logoutButton").onclick = () => {
+  localStorage.removeItem("lopes_auth_token"); localStorage.removeItem("lopes_profile"); authSession = ""; show("login");
+};>
