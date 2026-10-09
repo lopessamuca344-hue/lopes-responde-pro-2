@@ -19,6 +19,12 @@ module.exports = async (req, res) => {
     const code = error?.code || "";
     console.error("Erro em /api/chat:", code, error?.message || "erro sem mensagem");
 
+    if (code === "MISSING_OPENAI_API_KEY") {
+      return res.status(503).json({ erro: "O provedor GPT foi selecionado, mas falta configurar OPENAI_API_KEY no ambiente Production da Vercel." });
+    }
+    if (code.startsWith("OPENAI_HTTP_")) {
+      return res.status(502).json({ erro: "A API OpenAI recusou a solicitação. Confira a chave, o acesso ao modelo e o faturamento da API." });
+    }
     if (code === "MISSING_API_KEY" || (error?.message || "").includes("GEMINI_API_KEY não configurada")) {
       return res.status(503).json({ erro: "A IA não está configurada: falta GEMINI_API_KEY no ambiente Production da Vercel." });
     }
