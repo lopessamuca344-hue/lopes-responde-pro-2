@@ -9,19 +9,19 @@
     :root{color-scheme:dark;--bg:#07120e;--panel:#0e1d17;--line:#294338;--text:#f8fafc;--muted:#aabdb3;--green:#18b66a;--green2:#087b49;--gold:#e8bd58}
     *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
     body{min-height:100vh}.screen{min-height:100vh;display:none}.screen.active{display:flex}
-    .splash{align-items:center;justify-content:center;text-align:center;padding:28px;background:radial-gradient(circle at 50% 35%,#21101a 0,#080b14 48%)}
+    .splash{align-items:center;justify-content:center;text-align:center;padding:28px;background:radial-gradient(circle at 50% 35%,#123d2a 0,#07120e 58%)}
     .splash-inner{width:min(520px,92%)}.logo-mark{width:92px;height:92px;border-radius:28px;margin:0 auto 24px;display:grid;place-items:center;background:linear-gradient(145deg,var(--green),var(--green2));font-weight:900;font-size:30px;box-shadow:0 18px 50px #0008}
     .brand{font-size:27px;font-weight:900;letter-spacing:.8px}.slogan{font-size:18px;color:var(--muted);line-height:1.55;margin:12px auto 34px}
-    .primary,.google{width:100%;min-height:54px;border:0;border-radius:12px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--green);color:white}.primary:hover{background:#c32641}
+    .primary,.google{width:100%;min-height:54px;border:0;border-radius:12px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--green);color:white}.primary:hover{background:var(--green2)}
     .small{color:#7f8ba1;font-size:12px;margin-top:16px}
     .auth{align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#0b1020,#080b14)}.card{width:min(430px,94%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 20px 70px #0007}
     .back{background:none;border:0;color:var(--muted);padding:0;margin-bottom:22px;cursor:pointer}.card h1{font-size:27px;margin:0 0 8px}.card p{color:var(--muted);line-height:1.55}
     .google{background:#fff;color:#202124;display:flex;align-items:center;justify-content:center;gap:10px;margin:24px 0 12px}.g{font-weight:900;font-size:20px}
     .profile{align-items:center;justify-content:center;padding:24px;background:#080b14}.field{display:block;margin:18px 0 0;color:var(--muted);font-size:13px}.field input{display:block;width:100%;margin-top:7px;padding:14px;border-radius:11px;border:1px solid #3b465a;background:#0b1020;color:var(--text);font:inherit}
-    .app{display:flex;flex-direction:column}.topbar{padding:17px 20px;border-bottom:1px solid var(--line);background:#10172a;display:flex;justify-content:space-between;align-items:center}.topbrand{font-weight:900}.user-name{font-size:12px;color:var(--muted)}
+    .app{display:flex;flex-direction:column}.topbar{padding:17px 20px;border-bottom:1px solid var(--line);background:#0e1d17;display:flex;justify-content:space-between;align-items:center}.topbrand{font-weight:900}.user-name{font-size:12px;color:var(--muted)}
     .wrap{width:min(860px,94%);margin:30px auto}.welcome{margin-bottom:22px}.welcome h1{font-size:clamp(26px,5vw,36px);margin:0 0 8px}.welcome p{color:var(--muted);line-height:1.55;margin:0}
     .chat{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}.messages{min-height:280px;max-height:52vh;overflow:auto;padding:18px}
-    .bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;padding:13px 15px;border-radius:12px;margin:0 0 12px}.assistant{background:#202a3c;margin-right:7%}.user{background:#273d77;margin-left:7%}.notice{color:var(--muted);background:#172033}
+    .bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;padding:13px 15px;border-radius:12px;margin:0 0 12px}.assistant{background:#173326;margin-right:7%}.user{background:#17432e;margin-left:7%}.notice{color:var(--muted);background:#172033}
     form{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}textarea{font:inherit;color:var(--text);background:#0b1020;border:1px solid #3b465a;border-radius:10px;padding:13px;min-height:54px;max-height:160px;resize:vertical;flex:1;min-width:0}
     form button{border:0;border-radius:10px;background:var(--green);color:white;font:inherit;font-weight:700;padding:0 22px;min-height:50px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.hint{font-size:12px;color:var(--muted);padding:0 16px 14px}footer{text-align:center;color:#7e899d;padding:24px;font-size:12px}
     @media(max-width:540px){form{flex-direction:column}form button{width:100%}.assistant,.user{margin-left:0;margin-right:0}.messages{min-height:240px}}
@@ -121,10 +121,17 @@ document.getElementById("profileButton").onclick=()=>{
   applyPlanUI();show("app");
 };
 
-const usageStartedAt=Date.now();let totalUsageSeconds=Number(localStorage.getItem("lopes_usage_seconds")||0);let adUnlockUntil=Number(localStorage.getItem("lopes_ad_unlock_until")||0);
-function updateUsage(){if(localStorage.getItem("lopes_plan")!=="social")return;const session=Math.floor((Date.now()-usageStartedAt)/1000);const total=totalUsageSeconds+session;localStorage.setItem("lopes_usage_seconds",String(total));const m=Math.floor(total/60),s=total%60;const el=document.getElementById("usageText");if(el)el.textContent="Tempo gratuito acumulado: "+m+" min "+s+" s.";const gate=document.getElementById("adGate"),btn=document.getElementById("watchAdButton");const locked=total>=30 && Date.now()>adUnlockUntil;if(gate)gate.style.display=locked?"block":"none";if(btn)btn.style.display=locked?"inline-block":"none";}
+const usageStartedAt=Date.now();
+let totalUsageSeconds=Number(localStorage.getItem("lopes_usage_seconds")||0);
+let adUnlockUntil=Number(localStorage.getItem("lopes_ad_unlock_until")||0);
+let adPhase=Math.min(3,Math.max(1,Number(localStorage.getItem("lopes_ad_phase")||1)));
+let phaseAdCount=Number(localStorage.getItem("lopes_phase_ad_count")||0);
+const AD_PHASES=[{seconds:10,requiredAds:5,requiredUsageSeconds:600},{seconds:30,requiredAds:5,requiredUsageSeconds:1800},{seconds:35,requiredAds:Infinity,requiredUsageSeconds:Infinity}];
+function getUsageTotal(){return totalUsageSeconds+Math.floor((Date.now()-usageStartedAt)/1000);}
+function qualifyAdPhase(total){const rule=AD_PHASES[adPhase-1];if(adPhase<3&&(phaseAdCount>=rule.requiredAds||total>=rule.requiredUsageSeconds)){adPhase++;phaseAdCount=0;localStorage.setItem("lopes_ad_phase",String(adPhase));localStorage.setItem("lopes_phase_ad_count","0");}}
+function updateUsage(){if(localStorage.getItem("lopes_plan")!=="social")return;const total=getUsageTotal();localStorage.setItem("lopes_usage_seconds",String(total));qualifyAdPhase(total);const m=Math.floor(total/60),s=total%60;const el=document.getElementById("usageText");if(el)el.textContent="Uso acumulado: "+m+" min "+s+" s · Fase de publicidade "+adPhase+" ("+AD_PHASES[adPhase-1].seconds+" s).";const gate=document.getElementById("adGate"),btn=document.getElementById("watchAdButton");const locked=total>=30&&Date.now()>adUnlockUntil;if(gate)gate.style.display=locked?"block":"none";if(btn){btn.style.display=locked?"inline-block":"none";if(!btn.disabled)btn.textContent="Assistir publicidade de "+AD_PHASES[adPhase-1].seconds+" segundos para liberar";}}
 setInterval(updateUsage,1000);
-document.getElementById("watchAdButton").onclick=()=>{const btn=document.getElementById("watchAdButton");btn.disabled=true;btn.textContent="Publicidade em exibição...";setTimeout(()=>{adUnlockUntil=Date.now()+15*60*1000;localStorage.setItem("lopes_ad_unlock_until",String(adUnlockUntil));btn.disabled=false;btn.textContent="Assistir publicidade para liberar";updateUsage();},5000);};
+document.getElementById("watchAdButton").onclick=()=>{const btn=document.getElementById("watchAdButton");const duration=AD_PHASES[adPhase-1].seconds;btn.disabled=true;btn.textContent="Publicidade em exibição · "+duration+" s...";setTimeout(()=>{phaseAdCount++;localStorage.setItem("lopes_phase_ad_count",String(phaseAdCount));adUnlockUntil=Date.now()+15*60*1000;localStorage.setItem("lopes_ad_unlock_until",String(adUnlockUntil));qualifyAdPhase(getUsageTotal());btn.disabled=false;updateUsage();},duration*1000);};
 const form=document.getElementById("chatForm"),input=document.getElementById("userInput"),messages=document.getElementById("messages"),button=document.getElementById("sendButton");
 function addMessage(text,kind){const el=document.createElement("div");el.className="bubble "+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
 form.addEventListener("submit",async(event)=>{
@@ -140,8 +147,7 @@ form.addEventListener("submit",async(event)=>{
   finally{button.disabled=false;button.textContent="Enviar";input.focus()}
 });
 </script>
+
+<script>window.addEventListener("DOMContentLoaded",()=>{const savedName=localStorage.getItem("lopes_profile");if(savedName){document.getElementById("userName").textContent=savedName+" · "+(localStorage.getItem("lopes_plan")==="social"?"Social":"Plano");document.getElementById("welcomeTitle").textContent="Olá, "+savedName+"!";show("app");applyPlanUI();updateUsage();}});</script>
 </body>
 </html>
-<script>/* persistent session */
-window.addEventListener("DOMContentLoaded",()=>{const savedName=localStorage.getItem("lopes_profile");if(savedName){document.getElementById("userName").textContent=savedName+" · "+(localStorage.getItem("lopes_plan")==="social"?"Social":"Plano");document.getElementById("welcomeTitle").textContent="Olá, "+savedName+"!";show("app");applyPlanUI();}});
-</script>
