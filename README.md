@@ -38,7 +38,7 @@ Use um único provedor por vez. Depois de alterar variáveis, faça uma nova imp
 - `SUPABASE_SERVICE_ROLE_KEY`: chave secreta de serviço; somente no servidor/Vercel, nunca no navegador ou GitHub.
 - `MASTER_ADMIN_EMAIL`: opcional; e-mail do Administrador Master. O padrão no código é `lopessamuca344@gmail.com`.
 
-Para os controles administrativos, execute `supabase/admin-controls.sql` no SQL Editor do Supabase.
+Execute `supabase/profile-security.sql` e `supabase/admin-controls.sql` no SQL Editor do Supabase. O primeiro protege a tabela `perfil_usuario`; o segundo mantém a tabela de controles Master inacessível diretamente a usuários. Execute cada arquivo uma vez e confira se o Supabase retorna sucesso.
 Para gerar, validar e revogar códigos de teste, execute também `supabase/trial-access.sql`.
 
 ### Códigos de teste e envio de e-mail (opcional)
