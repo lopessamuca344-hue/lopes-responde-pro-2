@@ -44,7 +44,9 @@
       <h1>Bem-vindo ao Lopes</h1>
       <p>Entre para continuar e configurar seu perfil.</p>
       <button class="google" id="googleButton"><span class="g">G</span> Entrar com Google</button>
-      <div class="small">Seu acesso será usado para identificar seu perfil no aplicativo.</div>
+      <button class="google" id="emailButton" style="background:#202938;color:#f8fafc">✉ Entrar com e-mail</button>
+      <button class="google" id="phoneButton" style="background:#202938;color:#f8fafc">☎ Entrar com telefone</button>
+      <div class="small">Escolha como deseja entrar. No protótipo, as opções seguem para a configuração do seu perfil.</div>
     </div>
   </section>
 
@@ -81,11 +83,13 @@ function show(id){screens.forEach(x=>document.getElementById(x).classList.toggle
 document.getElementById("startButton").onclick=()=>show("login");
 document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>show(b.dataset.back));
 
-document.getElementById("googleButton").onclick=()=>{
-  // A tela de autenticação fica separada do cadastro. A integração real do Google
-  // pode ser conectada sem alterar o fluxo da aplicação.
-  show("profile");
-};
+["googleButton","emailButton","phoneButton"].forEach(id=>{
+  document.getElementById(id).onclick=()=>{
+    // No protótipo, qualquer método escolhido segue para a configuração do perfil.
+    // A autenticação real de cada provedor pode ser conectada posteriormente.
+    show("profile");
+  };
+});
 
 document.getElementById("profileButton").onclick=()=>{
   const name=document.getElementById("profileName").value.trim();
