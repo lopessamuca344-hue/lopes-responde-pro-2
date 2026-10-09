@@ -40,6 +40,12 @@ async function authenticatedUser(req) {
   return user;
 }
 
+async function authenticatedAdmin(req) {
+  const user = await authenticatedUser(req);
+  const masterEmail = (process.env.MASTER_ADMIN_EMAIL || "lopessamuca344@gmail.com").trim().toLowerCase();
+  return user && user.email.toLowerCase() === masterEmail ? user : null;
+}
+
 function hashCode(code) {
   return crypto.createHash("sha256").update(`${process.env.TRIAL_CODE_PEPPER || process.env.SUPABASE_SERVICE_ROLE_KEY}:${code}`).digest("hex");
 }
@@ -52,10 +58,8 @@ module.exports = async function trialAccessRoute(req, res) {
   if (!config(res)) return;
   try {
     if (req.method === "POST" && req.url.split("?")[0] === "/admin/codes") {
-      const adminKey = process.env.ADMIN_API_KEY;
-      if (!adminKey || req.headers["x-admin-key"] !== adminKey) {
-        return res.status(401).json({ erro: "Acesso administrativo não autorizado." });
-      }
+      const admin = await authenticatedAdmin(req);
+      if (!admin) return res.status(401).json({ erro: "Acesso administrativo não autorizado." });
       const emails = req.body && req.body.emails;
       if (!Array.isArray(emails) || emails.length !== 10) {
         return res.status(400).json({ erro: "Informe exatamente 10 e-mails diferentes e autorizados." });
@@ -137,8 +141,8 @@ module.exports = async function trialAccessRoute(req, res) {
     }
 
     if (req.method === "POST" && req.url.split("?")[0] === "/admin/revoke") {
-      const adminKey = process.env.ADMIN_API_KEY;
-      if (!adminKey || req.headers["x-admin-key"] !== adminKey) return res.status(401).json({ erro: "Acesso administrativo não autorizado." });
+      const admin = await authenticatedAdmin(req);
+      if (!admin) return res.status(401).json({ erro: "Acesso administrativo não autorizado." });
       const id = String((req.body || {}).id || "");
       const email = String((req.body || {}).email || "").trim().toLowerCase();
       if (!id && !email) return res.status(400).json({ erro: "Informe o id do código ou o e-mail autorizado." });
