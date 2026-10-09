@@ -19,52 +19,58 @@ async function generateAIResponse(message) {
 
   const apiKey = config.geminiApiKey;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY não configurada");
+    const error = new Error("GEMINI_API_KEY não configurada");
+    error.code = "MISSING_API_KEY";
+    throw error;
   }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
-
   let response;
   let data;
+
   try {
     response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
         signal: controller.signal,
         body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: SYSTEM_INSTRUCTIONS }]
-          },
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: message.trim() }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1200
-          }
+          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTIONS }] },
+          contents: [{ role: "user", parts: [{ text: message.trim() }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
         })
       }
     );
     data = await response.json().catch(() => ({}));
   } catch (error) {
     if (error?.name === "AbortError") {
-      throw new Error("Tempo limite excedido ao consultar a IA");
+      const timeoutError = new Error("Tempo limite excedido ao consultar a IA");
+      timeoutError.code = "GEMINI_TIMEOUT";
+      throw timeoutError;
     }
-    throw new Error("Falha de rede ao consultar a IA");
+    const networkError = new Error("Falha de rede ao consultar a IA");
+    networkError.code = "GEMINI_NETWORK";
+    throw networkError;
   } finally {
     clearTimeout(timeout);
   }
 
   if (!response.ok) {
-    // Não repassar detalhes do provedor nem dados de requisição ao usuário.
-    console.error("Gemini API respondeu com status:", response.status);
-    throw new Error("Erro ao conectar com o Gemini");
+    const providerMessage = data?.error?.message || "Sem detalhes do provedor";
+    console.error("Gemini API falhou:", JSON.stringify({
+      status: response.status,
+      statusText: response.statusText,
+      message: providerMessage
+    }));
+
+    const error = new Error("Gemini API respondeu com status " + response.status);
+    error.code = "GEMINI_HTTP_" + response.status;
+    throw error;
   }
 
   const assistantMessage = data?.candidates?.[0]?.content?.parts
@@ -73,7 +79,13 @@ async function generateAIResponse(message) {
     .trim();
 
   if (!assistantMessage) {
-    throw new Error("A IA não retornou uma resposta válida");
+    console.error("Gemini não retornou texto:", JSON.stringify({
+      promptFeedback: data?.promptFeedback?.blockReason || null,
+      candidateFinishReason: data?.candidates?.[0]?.finishReason || null
+    }));
+    const error = new Error("A IA não retornou uma resposta válida");
+    error.code = "GEMINI_EMPTY_RESPONSE";
+    throw error;
   }
 
   return { success: true, message: assistantMessage };
