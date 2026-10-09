@@ -88,7 +88,7 @@ module.exports = async function trialAccessRoute(req, res) {
                 from: process.env.TRIAL_FROM_EMAIL,
                 to: [email],
                 subject: "Seu código de teste — Lopes Responde Pro",
-                text: "Seu código individual é: " + code + "\\n\\nEle libera os planos Social, Pro, Executiva e Master até " + expires_at + ". Use-o somente na conta associada a este e-mail."
+                text: "Seu código individual é: " + code + "\n\nEle libera os planos Social, Pro, Executiva e Master até " + expires_at + ". Use-o somente na conta associada a este e-mail."
               })
             });
             return { email, enviado: response.ok, code: response.ok ? undefined : code };
