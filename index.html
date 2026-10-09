@@ -262,7 +262,7 @@ async function loadAdminControls() {
     if (!response.ok) throw new Error(data.erro || "Não foi possível carregar as permissões.");
     const controls = data.controls || {};
     document.querySelectorAll("[data-integration]").forEach(input => { input.checked = controls.integrations?.[input.dataset.integration] === true; });
-    document.getElementById("revokeList").value = (controls.revokedAuthorities || []).join("\\n");
+    document.getElementById("revokeList").value = (controls.revokedAuthorities || []).join("\n");
     status.textContent = "Permissões carregadas. O banco guarda os controles deste aplicativo.";
   } catch(e) { status.textContent = e.message || "Controles indisponíveis."; }
 }
@@ -271,10 +271,10 @@ async function saveAdminControls(revokeAll) {
   status.textContent = "Salvando alterações…";
   const integrations = {};
   document.querySelectorAll("[data-integration]").forEach(input => { integrations[input.dataset.integration] = revokeAll ? false : input.checked; });
-  const revokedAuthorities = document.getElementById("revokeList").value.split("\\n").map(s=>s.trim()).filter(Boolean);
+  const revokedAuthorities = document.getElementById("revokeList").value.split("\n").map(s=>s.trim()).filter(Boolean);
   if (revokeAll) {
     revokedAuthorities.push("Todas as permissões de integração revogadas pelo Administrador Master");
-    document.getElementById("revokeList").value = [...new Set(revokedAuthorities)].join("\\n");
+    document.getElementById("revokeList").value = [...new Set(revokedAuthorities)].join("\n");
   }
   try {
     const response = await fetch("/api/admin/controls", {method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+authSession},body:JSON.stringify({integrations,revokedAuthorities})});
