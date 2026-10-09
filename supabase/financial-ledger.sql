@@ -74,3 +74,82 @@ revoke all on table public.lopes_admin_assistants from public, anon, authenticat
 
 -- A seleção e alteração de permissões devem ocorrer somente por endpoint de servidor
 -- que valide a sessão do Administrador Master. Não conceder acesso direto pelo navegador.
+
+-- Fechamento transacional do período: calcula lucro e cria a obrigação de 10% sem transferir dinheiro.
+-- A chamada é permitida somente pelo backend com a chave service role.
+create or replace function public.lopes_close_profit_period(
+  p_period_start date,
+  p_period_end date,
+  p_gross_revenue numeric,
+  p_processing_fees numeric default 0,
+  p_refunds_and_chargebacks numeric default 0,
+  p_taxes numeric default 0,
+  p_eligible_operating_costs numeric default 0
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_net_profit numeric(14,2);
+  v_period public.lopes_profit_periods%rowtype;
+  v_assistant public.lopes_admin_assistants%rowtype;
+  v_share public.lopes_assistant_profit_shares%rowtype;
+begin
+  if p_period_start is null or p_period_end is null or p_period_end < p_period_start then
+    raise exception 'Período inválido';
+  end if;
+  if p_gross_revenue is null or p_processing_fees is null or p_refunds_and_chargebacks is null
+     or p_taxes is null or p_eligible_operating_costs is null
+     or p_gross_revenue < 0 or p_processing_fees < 0 or p_refunds_and_chargebacks < 0
+     or p_taxes < 0 or p_eligible_operating_costs < 0 then
+    raise exception 'Os valores financeiros devem ser informados e não podem ser negativos';
+  end if;
+
+  select * into v_assistant from public.lopes_admin_assistants where status = 'active' limit 1;
+  if not found then
+    raise exception 'Selecione o Administrador Ajudante antes de fechar o período financeiro';
+  end if;
+
+  v_net_profit := round(p_gross_revenue - p_processing_fees - p_refunds_and_chargebacks - p_taxes - p_eligible_operating_costs, 2);
+
+  insert into public.lopes_profit_periods (
+    period_start, period_end, gross_revenue, processing_fees, refunds_and_chargebacks,
+    taxes, eligible_operating_costs, eligible_net_profit, status, closed_at
+  ) values (
+    p_period_start, p_period_end, p_gross_revenue, p_processing_fees, p_refunds_and_chargebacks,
+    p_taxes, p_eligible_operating_costs, v_net_profit, 'closed', now()
+  )
+  on conflict (period_start, period_end) do nothing
+  returning * into v_period;
+
+  if not found then
+    raise exception 'Este período já existe; não foi criado outro registro';
+  end if;
+
+  insert into public.lopes_assistant_profit_shares (
+    profit_period_id, assistant_user_id, share_percent, eligible_profit, amount_due, payout_status
+  ) values (
+    v_period.id, v_assistant.user_id, 10.00, greatest(v_net_profit, 0),
+    round(greatest(v_net_profit, 0) * 0.10, 2), 'pending'
+  )
+  returning * into v_share;
+
+  return jsonb_build_object(
+    'period_id', v_period.id,
+    'period_start', v_period.period_start,
+    'period_end', v_period.period_end,
+    'gross_revenue', v_period.gross_revenue,
+    'eligible_net_profit', v_net_profit,
+    'assistant_user_id', v_assistant.user_id,
+    'share_percent', 10.00,
+    'amount_due', v_share.amount_due,
+    'payout_status', v_share.payout_status,
+    'transfer_executed', false
+  );
+end;
+$$;
+
+revoke all on function public.lopes_close_profit_period(date, date, numeric, numeric, numeric, numeric, numeric) from public, anon, authenticated;
+grant execute on function public.lopes_close_profit_period(date, date, numeric, numeric, numeric, numeric, numeric) to service_role;
