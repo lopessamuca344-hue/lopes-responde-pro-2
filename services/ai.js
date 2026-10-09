@@ -17,6 +17,46 @@ async function generateAIResponse(message) {
     throw new Error("Mensagem inválida");
   }
 
+  if ((process.env.AI_PROVIDER || "").toLowerCase() === "openai") {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      const error = new Error("OPENAI_API_KEY não configurada");
+      error.code = "MISSING_OPENAI_API_KEY";
+      throw error;
+    }
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + apiKey },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+        instructions: SYSTEM_INSTRUCTIONS,
+        input: message.trim(),
+        store: false
+      }),
+      signal: AbortSignal.timeout(25000)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("OpenAI Responses API falhou:", JSON.stringify({ status: response.status, message: data?.error?.message || "Sem detalhes" }));
+      const error = new Error("OpenAI API respondeu com status " + response.status);
+      error.code = "OPENAI_HTTP_" + response.status;
+      throw error;
+    }
+    const assistantMessage = (data.output || [])
+      .filter((item) => item?.type === "message")
+      .flatMap((item) => item?.content || [])
+      .filter((part) => part?.type === "output_text")
+      .map((part) => part.text || "")
+      .join("")
+      .trim() || String(data.output_text || "").trim();
+    if (!assistantMessage) {
+      const error = new Error("A OpenAI não retornou texto de resposta");
+      error.code = "OPENAI_EMPTY_RESPONSE";
+      throw error;
+    }
+    return { success: true, message: assistantMessage };
+  }
+
   const apiKey = config.geminiApiKey;
   if (!apiKey) {
     const error = new Error("GEMINI_API_KEY não configurada");
