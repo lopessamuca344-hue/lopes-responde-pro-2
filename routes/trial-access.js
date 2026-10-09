@@ -91,10 +91,16 @@ module.exports = async function trialAccessRoute(req, res) {
                 text: "Seu código individual é: " + code + "\\n\\nEle libera os planos Social, Pro, Executiva e Master até " + expires_at + ". Use-o somente na conta associada a este e-mail."
               })
             });
-            return { email, enviado: response.ok };
-          } catch (_) { return { email, enviado: false }; }
+            return { email, enviado: response.ok, code: response.ok ? undefined : code };
+          } catch (_) { return { email, enviado: false, code }; }
         }));
-        return res.status(201).json({ mensagem: "Códigos criados. Confira o resultado do envio por e-mail.", validade_dias: days, emails: emailResults });
+        const failed = emailResults.filter((item) => !item.enviado).map(({ email, code }) => ({ email, code }));
+        return res.status(201).json({
+          mensagem: failed.length ? "Os códigos foram criados. Alguns e-mails falharam; os códigos desses destinatários estão incluídos para envio manual seguro." : "Os 10 e-mails foram aceitos pelo provedor. Isso confirma aceitação do envio, não a entrega na caixa de entrada.",
+          validade_dias: days,
+          emails: emailResults.map(({ email, enviado }) => ({ email, enviado })),
+          falhas_para_envio_manual: failed
+        });
       }
       return res.status(201).json({
         mensagem: "10 códigos criados. Envio automático não configurado; guarde os códigos desta resposta administrativa e envie manualmente.",
