@@ -23,7 +23,13 @@ module.exports = async (req, res) => {
       return res.status(503).json({ erro: "A IA não está configurada: falta GEMINI_API_KEY no ambiente Production da Vercel." });
     }
     if (code === "GEMINI_HTTP_401" || code === "GEMINI_HTTP_403") {
-      return res.status(502).json({ erro: "O Gemini recusou a chave de API ou a permissão do projeto. É necessário corrigir a chave ou a autorização no Google AI Studio." });
+      return res.status(502).json({ erro: "O Google recusou a chave ou a permissão da API. Em outubro de 2026, confira se a chave Gemini é do tipo de autorização (Auth), não uma chave padrão antiga, e se tem acesso à API Gemini." });
+    }
+    if (code === "GEMINI_HTTP_404") {
+      return res.status(502).json({ erro: "O Google não encontrou o modelo ou recurso solicitado. Confirme a variável GEMINI_MODEL; o padrão atual deste sistema é gemini-3.8-flash." });
+    }
+    if (code === "GEMINI_HTTP_400") {
+      return res.status(502).json({ erro: "O Google rejeitou o formato da solicitação. Consulte os registros técnicos da Vercel para identificar o motivo." });
     }
     if (code === "GEMINI_HTTP_429") {
       return res.status(502).json({ erro: "O Gemini informou limite de uso ou cota excedida. Verifique a cota do projeto no Google AI Studio." });
@@ -31,6 +37,6 @@ module.exports = async (req, res) => {
     if (code === "GEMINI_TIMEOUT") {
       return res.status(504).json({ erro: "O Gemini demorou demais para responder. Tente novamente em instantes." });
     }
-    return res.status(502).json({ erro: "Não foi possível obter resposta da IA. O registro técnico agora identifica melhor a causa." });
+    return res.status(502).json({ erro: "Não foi possível obter resposta da IA. Consulte os registros técnicos da Vercel para identificar a causa." });
   }
 };
