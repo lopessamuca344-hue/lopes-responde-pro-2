@@ -12,7 +12,7 @@ Este recurso cria 10 códigos individuais por e-mail, valida o código contra o 
    - `SUPABASE_ANON_KEY`: chave pública do Supabase usada para validar a sessão (recomendado).
    - `ADMIN_API_KEY`: segredo longo e aleatório para proteger endpoints administrativos.
    - `TRIAL_CODE_PEPPER`: segredo aleatório adicional para hash dos códigos.
-   - `TRIAL_DAYS`: duração do teste em dias (padrão 14; permitido de 1 a 90).
+   - `TRIAL_DAYS`: duração do teste em dias (padrão 14; permitido de 1 a 90).\n   - `RESEND_API_KEY`: chave do provedor Resend para envio automático (opcional até configurar e-mail).\n   - `TRIAL_FROM_EMAIL`: remetente verificado no Resend (obrigatório junto com `RESEND_API_KEY` para envio automático).
 4. Faça novo deploy depois de configurar as variáveis.
 
 ## Rotas
@@ -25,6 +25,6 @@ Este recurso cria 10 códigos individuais por e-mail, valida o código contra o 
 ## Limitações importantes
 
 - A interface atual ainda usa login demonstrativo no navegador. As rotas de resgate exigem uma sessão real do Supabase; é necessário integrar a autenticação Supabase à interface antes de os usuários conseguirem resgatar códigos.
-- O envio automático de e-mail ainda não está integrado. Até integrar um provedor e configurar domínio remetente, o administrador deve enviar os códigos manualmente em canal seguro.
+- O endpoint já oferece envio opcional pelo Resend quando `RESEND_API_KEY` e `TRIAL_FROM_EMAIL` estão configurados. Sem essas variáveis, os códigos são retornados apenas à chamada administrativa para envio manual.
 - O chat e os recursos visuais dos planos ainda não consultam este direito de acesso. Portanto, este commit implementa a base do mecanismo, mas não significa que todos os planos estejam liberados na interface ou que o sistema esteja pronto para produção.
 - Nunca exponha `SUPABASE_SERVICE_ROLE_KEY` nem `ADMIN_API_KEY` no HTML, JavaScript do navegador ou mensagens públicas.
