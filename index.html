@@ -25,7 +25,16 @@
     form{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}textarea{font:inherit;color:var(--text);background:#0b1020;border:1px solid #3b465a;border-radius:10px;padding:13px;min-height:54px;max-height:160px;resize:vertical;flex:1;min-width:0}
     form button{border:0;border-radius:10px;background:var(--green);color:white;font:inherit;font-weight:700;padding:0 22px;min-height:50px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.hint{font-size:12px;color:var(--muted);padding:0 16px 14px}footer{text-align:center;color:#7e899d;padding:24px;font-size:12px}
     @media(max-width:540px){form{flex-direction:column}form button{width:100%}.assistant,.user{margin-left:0;margin-right:0}.messages{min-height:240px}}
-  </style>
+  
+    .screen{animation:screenIn .38s ease both}.screen.active .card,.screen.active .splash-inner{animation:contentIn .45s ease both}
+    @keyframes screenIn{from{opacity:0}to{opacity:1}}@keyframes contentIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+    .logo-mark{animation:logoFloat 3.2s ease-in-out infinite}@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    .ad-slot{margin:18px 0;padding:14px;border:1px solid #345244;border-radius:14px;background:linear-gradient(135deg,#10271c,#0b1812);position:relative;overflow:hidden}
+    .ad-slot:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,#ffffff10 50%,transparent 65%);transform:translateX(-100%);animation:adShine 4s ease-in-out infinite}
+    @keyframes adShine{0%,55%{transform:translateX(-100%)}75%,100%{transform:translateX(100%)}}
+    .ad-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8eb5a1;font-weight:800}.ad-title{font-weight:800;margin-top:5px}.ad-text{font-size:12px;color:#b8cec3;margin-top:4px;line-height:1.45}
+    .ad-action{margin-top:9px;border:1px solid #3c7459;background:#153427;color:#fff;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
+</style>
 </head>
 <body>
   <section id="splash" class="screen splash active">
@@ -66,6 +75,12 @@
     <header class="topbar"><div class="topbrand">LOPES RESPONDE PRO</div><div class="user-name" id="userName"></div></header>
     <main class="wrap">
       <div class="welcome"><h1 id="welcomeTitle">Olá! Eu sou o Lopes.</h1><p>Você está na Versão Social gratuita. Envie uma mensagem para conversar com o assistente.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="padding:7px 10px;border-radius:999px;background:#153427;border:1px solid var(--line);font-size:11px">Plano: Social · Gratuito</span><span style="padding:7px 10px;border-radius:999px;background:#153427;border:1px solid var(--line);font-size:11px">WhatsApp: básico</span></div></div>
+      <section id="socialAd" class="ad-slot" aria-label="Publicidade">
+        <div class="ad-label">Publicidade · Plano Social</div>
+        <div class="ad-title">Espaço para parceiros e ofertas</div>
+        <div class="ad-text">Anúncios de comércio e serviços podem aparecer aqui no plano Social, ajudando a monetizar a versão gratuita.</div>
+        <button class="ad-action" type="button" onclick="alert('Espaço publicitário do Lopes Responde Pro.')">Ver anúncio</button>
+      </section>
       <section class="chat" aria-label="Conversa com o assistente">
         <div id="messages" class="messages" aria-live="polite"><div class="bubble assistant">Olá! Estou aqui. Digite sua mensagem abaixo para começar.</div></div>
         <form id="chatForm">
@@ -81,7 +96,7 @@
 
 <script>
 const screens=["splash","login","profile","app"];
-function show(id){screens.forEach(x=>document.getElementById(x).classList.toggle("active",x===id));}
+function show(id){screens.forEach(x=>document.getElementById(x).classList.toggle("active",x===id));if(id==="app")applyPlanUI();}
 document.getElementById("startButton").onclick=()=>show("login");
 document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>show(b.dataset.back));
 
@@ -93,13 +108,14 @@ document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>show(b.dataset
   };
 });
 
+function applyPlanUI(){const plan=localStorage.getItem("lopes_plan")||"social";const ad=document.getElementById("socialAd");if(ad)ad.style.display=plan==="social"?"block":"none";const badge=document.querySelector(".welcome span");if(badge)badge.textContent="Plano: "+(plan==="social"?"Social · Gratuito":plan.charAt(0).toUpperCase()+plan.slice(1));}
 document.getElementById("profileButton").onclick=()=>{
   const name=document.getElementById("profileName").value.trim();
   if(!name){document.getElementById("profileName").focus();return;}
-  localStorage.setItem("lopes_plan","social");
+  localStorage.setItem("lopes_profile",name);localStorage.setItem("lopes_plan","social");
   document.getElementById("userName").textContent=name+" · Social";
   document.getElementById("welcomeTitle").textContent="Olá, "+name+"!";
-  show("app");
+  applyPlanUI();show("app");
 };
 
 const form=document.getElementById("chatForm"),input=document.getElementById("userInput"),messages=document.getElementById("messages"),button=document.getElementById("sendButton");
@@ -119,3 +135,6 @@ form.addEventListener("submit",async(event)=>{
 </script>
 </body>
 </html>
+<script>/* persistent session */
+window.addEventListener("DOMContentLoaded",()=>{const savedName=localStorage.getItem("lopes_profile");if(savedName){document.getElementById("userName").textContent=savedName+" · "+(localStorage.getItem("lopes_plan")==="social"?"Social":"Plano");document.getElementById("welcomeTitle").textContent="Olá, "+savedName+"!";show("app");applyPlanUI();}});
+</script>
