@@ -11,6 +11,7 @@ const sourceFiles = [
   "routes/auth.js",
   "routes/admin-controls.js",
   "routes/admin-assistants.js",
+  "routes/admin-finance.js",
   "routes/trial-access.js"
 ];
 
