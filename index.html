@@ -148,13 +148,12 @@
     <header class="topbar"><div class="topbrand">LOPES RESPONDE PRO</div><div class="user-name" id="userName"></div></header>
     <main class="wrap">
       <div class="welcome"><h1 id="welcomeTitle">Olá! Eu sou o Lopes.</h1><p>Você está na Versão Social gratuita. Envie uma mensagem para conversar com o assistente.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="padding:7px 10px;border-radius:999px;background:#153427;border:1px solid var(--line);font-size:11px">Plano: Social · Gratuito</span><span style="padding:7px 10px;border-radius:999px;background:#153427;border:1px solid var(--line);font-size:11px">WhatsApp: básico</span></div></div>
-      <section id="socialAd" class="ad-slot" aria-label="Publicidade">
-        <div class="ad-label">Publicidade · Plano Social</div>
-        <div class="ad-title">Espaço para parceiros e ofertas</div>
-        <div class="ad-text">Anúncios de comércio e serviços podem aparecer aqui no plano Social, ajudando a monetizar a versão gratuita.</div>
-        <button class="ad-action" type="button" onclick="alert('Espaço publicitário do Lopes Responde Pro.')">Ver anúncio</button>
+      <section id="socialAd" class="ad-slot" aria-label="Espaço publicitário">
+        <div class="ad-label">Espaço publicitário</div>
+        <div class="ad-title">Área reservada para anúncios</div>
+        <div class="ad-text">Nenhuma rede de anúncios está conectada neste momento. Nenhum anúncio está sendo exibido ou contabilizado.</div>
       </section>
-      <div class="usage-card" id="usageCard"><strong>Uso do Social</strong><div id="usageText">Tempo gratuito sendo contabilizado.</div><div class="gate" id="adGate">Para continuar usando esta função, assista à publicidade disponível. Depois da exibição, a função será liberada pelo período definido pelo sistema.</div><button class="usage-btn" id="watchAdButton" type="button" style="display:none">Assistir publicidade para liberar</button></div>
+      <div class="usage-card" id="usageCard"><strong>Uso do Social</strong><div id="usageText">Contador informativo deste aparelho.</div><div class="ad-text">Este contador não limita o acesso, não cobra valores e não comprova exibição de publicidade.</div></div>
       <section class="platform-panel" aria-label="Atalhos para aplicativos">
         <strong>Seus aplicativos</strong>
         <p style="font-size:12px;color:var(--muted);margin:6px 0">Estes links abrem os sites oficiais, sem exigir download. Para o Lopes operar uma conta, é necessária uma integração oficial conectada e autorizada; o atalho sozinho não conecta a conta.</p>
@@ -307,16 +306,15 @@ document.getElementById("profileButton").onclick=()=>{
 };
 
 const usageStartedAt=Date.now();
-let totalUsageSeconds=Number(localStorage.getItem("lopes_usage_seconds")||0);
-let adUnlockUntil=Number(localStorage.getItem("lopes_ad_unlock_until")||0);
-let adPhase=Math.min(3,Math.max(1,Number(localStorage.getItem("lopes_ad_phase")||1)));
-let phaseAdCount=Number(localStorage.getItem("lopes_phase_ad_count")||0);
-const AD_PHASES=[{seconds:10,requiredAds:5,requiredUsageSeconds:600},{seconds:30,requiredAds:5,requiredUsageSeconds:1800},{seconds:35,requiredAds:Infinity,requiredUsageSeconds:Infinity}];
-function getUsageTotal(){return totalUsageSeconds+Math.floor((Date.now()-usageStartedAt)/1000);}
-function qualifyAdPhase(total){const rule=AD_PHASES[adPhase-1];if(adPhase<3&&(phaseAdCount>=rule.requiredAds||total>=rule.requiredUsageSeconds)){adPhase++;phaseAdCount=0;localStorage.setItem("lopes_ad_phase",String(adPhase));localStorage.setItem("lopes_phase_ad_count","0");}}
-function updateUsage(){if(localStorage.getItem("lopes_plan")!=="social")return;const total=getUsageTotal();localStorage.setItem("lopes_usage_seconds",String(total));qualifyAdPhase(total);const m=Math.floor(total/60),s=total%60;const el=document.getElementById("usageText");if(el)el.textContent="Uso acumulado: "+m+" min "+s+" s · Fase de publicidade "+adPhase+" ("+AD_PHASES[adPhase-1].seconds+" s).";const gate=document.getElementById("adGate"),btn=document.getElementById("watchAdButton");const locked=total>=30&&Date.now()>adUnlockUntil;if(gate)gate.style.display=locked?"block":"none";if(btn){btn.style.display=locked?"inline-block":"none";if(!btn.disabled)btn.textContent="Assistir publicidade de "+AD_PHASES[adPhase-1].seconds+" segundos para liberar";}}
+const savedUsageSeconds=Math.max(0,Number(localStorage.getItem("lopes_usage_seconds")||0));
+function updateUsage(){
+  const total=savedUsageSeconds+Math.floor((Date.now()-usageStartedAt)/1000);
+  const m=Math.floor(total/60),s=total%60;
+  const el=document.getElementById("usageText");
+  if(el)el.textContent="Uso informativo nesta sessão: "+m+" min "+s+" s.";
+}
 setInterval(updateUsage,1000);
-document.getElementById("watchAdButton").onclick=()=>{const btn=document.getElementById("watchAdButton");const duration=AD_PHASES[adPhase-1].seconds;btn.disabled=true;btn.textContent="Publicidade em exibição · "+duration+" s...";setTimeout(()=>{phaseAdCount++;localStorage.setItem("lopes_phase_ad_count",String(phaseAdCount));adUnlockUntil=Date.now()+15*60*1000;localStorage.setItem("lopes_ad_unlock_until",String(adUnlockUntil));qualifyAdPhase(getUsageTotal());btn.disabled=false;updateUsage();},duration*1000);};
+updateUsage();
 const form=document.getElementById("chatForm"),input=document.getElementById("userInput"),messages=document.getElementById("messages"),button=document.getElementById("sendButton");
 function addMessage(text,kind){const el=document.createElement("div");el.className="bubble "+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
 form.addEventListener("submit",async(event)=>{
