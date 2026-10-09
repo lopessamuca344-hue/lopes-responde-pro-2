@@ -36,6 +36,14 @@
     .ad-action{margin-top:9px;border:1px solid #3c7459;background:#153427;color:#fff;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
     .usage-card{margin:18px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#0b1812;font-size:12px;color:#b8cec3}.usage-card strong{color:#fff}.usage-btn{margin-top:10px;border:0;border-radius:9px;background:var(--green);color:#fff;padding:9px 12px;font-weight:800;cursor:pointer}
     .gate{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#172a22;border:1px solid #3d6a55;color:#d7e8df;line-height:1.45}
+    .platform-panel{margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:16px;background:#0b1812}
+    .platform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-top:12px}
+    .platform-item{border:1px solid #294338;border-radius:12px;padding:12px;background:#10271c;display:flex;flex-direction:column;gap:9px;min-width:0}
+    .platform-name{font-weight:800}.platform-link{display:block;text-align:center;text-decoration:none;color:#fff;background:#17663f;border:1px solid #3c7459;border-radius:9px;padding:9px 7px;font-size:12px;font-weight:800}
+    .control-check{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #294338;border-radius:10px;background:#0b1812;color:#dce9e2}
+    .control-check input{width:18px;height:18px;accent-color:#18b66a}
+    .danger-btn{width:100%;min-height:48px;border:1px solid #8f3b3b;border-radius:10px;background:#3b1717;color:#fff;font-weight:800;margin-top:10px;cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -112,6 +120,25 @@
         <div id="adminSetupStatus" role="status" style="font-size:13px;color:#e8bd58;margin-top:12px">Os convites dependem da configuração do banco.</div>
         <pre id="inviteResults" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px"></pre>
       </div>
+      <div style="margin-top:18px;padding:15px;border:1px solid #294338;border-radius:12px">
+        <strong>Autorizações e integrações</strong>
+        <p style="font-size:13px">Ative ou revogue as permissões internas de atalhos. Isso não encerra contratos externos nem substitui a desconexão oficial de cada plataforma.</p>
+        <div id="adminIntegrationControls" style="display:grid;gap:8px;margin:12px 0">
+          <label class="control-check"><input type="checkbox" data-integration="whatsapp"> WhatsApp</label>
+          <label class="control-check"><input type="checkbox" data-integration="telegram"> Telegram</label>
+          <label class="control-check"><input type="checkbox" data-integration="instagram"> Instagram</label>
+          <label class="control-check"><input type="checkbox" data-integration="facebook"> Facebook</label>
+          <label class="control-check"><input type="checkbox" data-integration="x"> X</label>
+          <label class="control-check"><input type="checkbox" data-integration="shopee"> Shopee</label>
+          <label class="control-check"><input type="checkbox" data-integration="chatgpt"> GPT / OpenAI</label>
+        </div>
+        <label class="field">Permissões adicionais a revogar (uma por linha)
+          <textarea id="revokeList" maxlength="4000" placeholder="Descreva as permissões que deseja bloquear" style="width:100%;margin-top:7px"></textarea>
+        </label>
+        <button class="primary" id="saveAdminControls" type="button" style="margin-top:12px">Salvar permissões</button>
+        <button class="danger-btn" id="revokeAllIntegrations" type="button">Revogar todas as permissões de integração</button>
+        <div id="controlsStatus" role="status" style="font-size:13px;color:#e8bd58;margin-top:10px">Os controles precisam do banco Supabase configurado.</div>
+      </div>
       <button class="primary" id="adminContinue" style="margin-top:18px">Abrir o assistente</button>
       <button class="google" id="logoutButton" style="margin-top:10px">Sair da conta</button>
     </div>
@@ -128,6 +155,19 @@
         <button class="ad-action" type="button" onclick="alert('Espaço publicitário do Lopes Responde Pro.')">Ver anúncio</button>
       </section>
       <div class="usage-card" id="usageCard"><strong>Uso do Social</strong><div id="usageText">Tempo gratuito sendo contabilizado.</div><div class="gate" id="adGate">Para continuar usando esta função, assista à publicidade disponível. Depois da exibição, a função será liberada pelo período definido pelo sistema.</div><button class="usage-btn" id="watchAdButton" type="button" style="display:none">Assistir publicidade para liberar</button></div>
+      <section class="platform-panel" aria-label="Atalhos para aplicativos">
+        <strong>Seus aplicativos</strong>
+        <p style="font-size:12px;color:var(--muted);margin:6px 0">Use os atalhos oficiais para abrir ou baixar os aplicativos. A conexão automática com contas exige integração autorizada separadamente.</p>
+        <div class="platform-grid">
+          <div class="platform-item"><span class="platform-name">WhatsApp</span><a class="platform-link" href="https://www.whatsapp.com/download" target="_blank" rel="noopener noreferrer">↓ Baixar / abrir</a></div>
+          <div class="platform-item"><span class="platform-name">Telegram</span><a class="platform-link" href="https://telegram.org/apps" target="_blank" rel="noopener noreferrer">↓ Baixar / abrir</a></div>
+          <div class="platform-item"><span class="platform-name">Instagram</span><a class="platform-link" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">↓ Abrir aplicativo</a></div>
+          <div class="platform-item"><span class="platform-name">Facebook</span><a class="platform-link" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">↓ Abrir aplicativo</a></div>
+          <div class="platform-item"><span class="platform-name">X</span><a class="platform-link" href="https://x.com/" target="_blank" rel="noopener noreferrer">↓ Abrir aplicativo</a></div>
+          <div class="platform-item"><span class="platform-name">Shopee</span><a class="platform-link" href="https://shopee.com.br/" target="_blank" rel="noopener noreferrer">↓ Abrir aplicativo</a></div>
+          <div class="platform-item"><span class="platform-name">ChatGPT</span><a class="platform-link" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Abrir o GPT ↗</a></div>
+        </div>
+      </section>
       <section class="chat" aria-label="Conversa com o assistente">
         <div id="messages" class="messages" aria-live="polite"><div class="bubble assistant">Olá! Estou aqui. Digite sua mensagem abaixo para começar.</div></div>
         <form id="chatForm">
@@ -171,7 +211,7 @@ async function enterAuthenticatedAccount(token) {
     if (data.isAdmin) {
       document.getElementById("adminEmail").textContent = data.email;
       document.getElementById("adminSetupStatus").textContent = "Conta reconhecida como Administrador Master. Os convites exigem Supabase e tabela trial_access_codes configurados.";
-      show("admin");
+      show("admin");\n      loadAdminControls();
     } else {
       document.getElementById("authNotice").textContent = "";
       show("profile");
@@ -213,6 +253,38 @@ document.getElementById("generateInvites").onclick = async () => {
     out.textContent = JSON.stringify(data.codigos || data.falhas_para_envio_manual || data.emails || data, null, 2);
   } catch(e) { status.textContent = e.message || "Falha ao gerar códigos."; }
 };
+async function loadAdminControls() {
+  const status = document.getElementById("controlsStatus");
+  if (!status) return;
+  try {
+    const response = await fetch("/api/admin/controls", {headers:{Authorization:"Bearer "+authSession}});
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok) throw new Error(data.erro || "Não foi possível carregar as permissões.");
+    const controls = data.controls || {};
+    document.querySelectorAll("[data-integration]").forEach(input => { input.checked = controls.integrations?.[input.dataset.integration] === true; });
+    document.getElementById("revokeList").value = (controls.revokedAuthorities || []).join("\\n");
+    status.textContent = "Permissões carregadas. O banco guarda os controles deste aplicativo.";
+  } catch(e) { status.textContent = e.message || "Controles indisponíveis."; }
+}
+async function saveAdminControls(revokeAll) {
+  const status = document.getElementById("controlsStatus");
+  status.textContent = "Salvando alterações…";
+  const integrations = {};
+  document.querySelectorAll("[data-integration]").forEach(input => { integrations[input.dataset.integration] = revokeAll ? false : input.checked; });
+  const revokedAuthorities = document.getElementById("revokeList").value.split("\\n").map(s=>s.trim()).filter(Boolean);
+  if (revokeAll) {
+    revokedAuthorities.push("Todas as permissões de integração revogadas pelo Administrador Master");
+    document.getElementById("revokeList").value = [...new Set(revokedAuthorities)].join("\\n");
+  }
+  try {
+    const response = await fetch("/api/admin/controls", {method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+authSession},body:JSON.stringify({integrations,revokedAuthorities})});
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok) throw new Error(data.erro || "Não foi possível salvar.");
+    status.textContent = data.mensagem || "Permissões salvas.";
+  } catch(e) { status.textContent = e.message || "Falha ao salvar."; }
+}
+document.getElementById("saveAdminControls").onclick = () => saveAdminControls(false);
+document.getElementById("revokeAllIntegrations").onclick = () => { if (confirm("Revogar todas as permissões de integração dentro do Lopes Responde Pro?")) saveAdminControls(true); };
 document.getElementById("adminContinue").onclick = () => {
   const name = localStorage.getItem("lopes_profile") || "Administrador Master";
   document.getElementById("userName").textContent = name + " · Master";
