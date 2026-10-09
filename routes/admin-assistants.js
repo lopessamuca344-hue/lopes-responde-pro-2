@@ -30,6 +30,22 @@ async function masterFromRequest(req) {
   return user.email && user.email_confirmed_at && user.email.toLowerCase() === MASTER_EMAIL ? user : null;
 }
 
+async function findConfirmedUserByEmail(email) {
+  const base = process.env.SUPABASE_URL.replace(/\\/$/, "");
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  for (let page = 1; page <= 20; page++) {
+    const url = base + "/auth/v1/admin/users?page=" + page + "&per_page=1000";
+    const response = await fetch(url, { headers: { apikey: key, Authorization: "Bearer " + key } });
+    if (!response.ok) throw new Error("Não foi possível consultar usuários no Supabase Auth.");
+    const data = await response.json();
+    const users = Array.isArray(data.users) ? data.users : [];
+    const found = users.find((user) => String(user.email || "").toLowerCase() === email);
+    if (found) return found.email_confirmed_at ? found : null;
+    if (users.length < 1000) break;
+  }
+  return null;
+}
+
 async function db(path, options = {}) {
   const base = process.env.SUPABASE_URL.replace(/\/$/, "");
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -61,19 +77,22 @@ router.all("/", async (req, res) => {
     const action = String(req.query.action || (req.body || {}).action || "").toLowerCase();
 
     if (req.method === "GET") {
-      const rows = await db("lopes_admin_assistants?select=id,user_id,display_name,status,permissions,evaluation_notes,selected_by,selected_at,created_at,updated_at&order=created_at.asc");
+      const rows = await db("lopes_admin_assistants?select=id,user_id,email,display_name,status,permissions,evaluation_notes,selected_by,selected_at,created_at,updated_at&order=created_at.asc");
       return res.json({ candidatos: rows, maximo_candidatos: 10, permissoes_disponiveis: [...ALLOWED_PERMISSIONS] });
     }
 
     const input = req.body || {};
     if (action === "candidate") {
-      const userId = String(input.user_id || "").trim();
+      const email = String(input.email || "").trim().toLowerCase();
       const displayName = String(input.display_name || "").trim().slice(0, 100);
-      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)) {
-        return res.status(400).json({ erro: "Informe o ID UUID da conta Supabase do candidato." });
+      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+        return res.status(400).json({ erro: "Informe um e-mail válido de uma conta já cadastrada e confirmada no aplicativo." });
       }
-      const existing = await db("lopes_admin_assistants?select=id,user_id,status");
-      const already = existing.find((item) => item.user_id === userId);
+      const account = await findConfirmedUserByEmail(email);
+      if (!account) return res.status(404).json({ erro: "Não encontrei uma conta confirmada com esse e-mail. A pessoa precisa se cadastrar e confirmar o e-mail primeiro." });
+      const userId = account.id;
+      const existing = await db("lopes_admin_assistants?select=id,user_id,email,status");
+      const already = existing.find((item) => item.user_id === userId || String(item.email || "").toLowerCase() === email);
       if (already) return res.status(409).json({ erro: "Esta conta já está cadastrada como candidata ou Ajudante." });
       if (existing.filter((item) => item.status !== "revoked").length >= 10) {
         return res.status(409).json({ erro: "O limite de 10 candidatos já foi atingido. Revogue uma candidatura antes de adicionar outra." });
@@ -81,7 +100,7 @@ router.all("/", async (req, res) => {
       const rows = await db("lopes_admin_assistants", {
         method: "POST",
         headers: { Prefer: "return=representation" },
-        body: JSON.stringify([{ user_id: userId, display_name: displayName, status: "candidate", permissions: [], selected_by: master.email }])
+        body: JSON.stringify([{ user_id: userId, email, display_name: displayName, status: "candidate", permissions: [], selected_by: master.email }])
       });
       return res.status(201).json({ mensagem: "Candidato cadastrado.", candidato: rows[0] });
     }
