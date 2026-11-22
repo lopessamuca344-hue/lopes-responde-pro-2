@@ -71,7 +71,7 @@ async function generateAIResponse(message) {
   }
 
   // Chamada Gemini generateContent com formato compatível com a API REST estável.
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
   let response;
