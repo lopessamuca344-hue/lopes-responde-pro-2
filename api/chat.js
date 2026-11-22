@@ -59,7 +59,12 @@ module.exports = async (req, res) => {
       return res.status(502).json({ erro: "O Gemini recusou a chave de API ou a permissão do projeto. É necessário corrigir a chave ou a autorização no Google AI Studio." });
     }
     if (code === "GEMINI_HTTP_429") {
-      return res.status(502).json({ erro: "O Gemini informou limite de uso ou cota excedida. Verifique a cota do projeto no Google AI Studio." });
+      res.setHeader("Retry-After", "30");
+      return res.status(503).json({ erro: "O Gemini informou limite de uso ou cota temporariamente indisponível. Aguarde e tente novamente; confira a cota no Google AI Studio se persistir." });
+    }
+    if (code === "GEMINI_HTTP_503" || code === "GEMINI_HTTP_500" || code === "GEMINI_HTTP_502") {
+      res.setHeader("Retry-After", "15");
+      return res.status(503).json({ erro: "O serviço Gemini está temporariamente indisponível ou sobrecarregado. Aguarde alguns segundos e tente novamente." });
     }
     if (code === "GEMINI_TIMEOUT") {
       return res.status(504).json({ erro: "O Gemini demorou demais para responder. Tente novamente em instantes." });
