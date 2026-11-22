@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     return res.status(200).json(await processChatMessage(message.trim()));
   } catch (error) {
     const code = error?.code || "";
-    console.error("Erro em /api/chat:", code, error?.message || "erro sem mensagem");
+    console.error("Erro em /api/chat:", JSON.stringify({ code, message: error?.message || "erro sem mensagem", causeCode: error?.causeCode || null, causeName: error?.causeName || null, causeMessage: error?.causeMessage || null }));
 
     if (code === "MISSING_OPENAI_API_KEY") {
       return res.status(503).json({ erro: "O provedor GPT foi selecionado, mas falta configurar OPENAI_API_KEY no ambiente Production da Vercel." });
