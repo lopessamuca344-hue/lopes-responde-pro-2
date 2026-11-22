@@ -1,9 +1,35 @@
 const { processChatMessage } = require("../services/chat");
 
+const WINDOW_MS = 60 * 1000;
+const MAX_REQUESTS = 10;
+const requestsByIp = new Map();
+
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.length) return forwarded.split(",")[0].trim();
+  return req.socket?.remoteAddress || "unknown";
+}
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const current = requestsByIp.get(ip);
+  if (!current || now - current.startedAt >= WINDOW_MS) {
+    requestsByIp.set(ip, { startedAt: now, count: 1 });
+    return false;
+  }
+  current.count += 1;
+  return current.count > MAX_REQUESTS;
+}
+
 module.exports = async (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ erro: "Método não permitido" });
+  }
+
+  if (isRateLimited(getClientIp(req))) {
+    return res.status(429).json({ erro: "Muitas mensagens em pouco tempo. Aguarde um minuto e tente novamente." });
   }
 
   try {
