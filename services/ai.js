@@ -99,6 +99,10 @@ async function generateAIResponse(message) {
     }
     const networkError = new Error("Falha de rede ao consultar a IA");
     networkError.code = "GEMINI_NETWORK";
+    networkError.cause = error;
+    networkError.causeCode = error?.cause?.code || error?.code || null;
+    networkError.causeName = error?.cause?.name || error?.name || null;
+    networkError.causeMessage = String(error?.cause?.message || error?.message || "").slice(0, 160);
     throw networkError;
   } finally {
     clearTimeout(timeout);

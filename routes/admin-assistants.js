@@ -85,7 +85,7 @@ router.all("/", async (req, res) => {
     if (action === "candidate") {
       const email = String(input.email || "").trim().toLowerCase();
       const displayName = String(input.display_name || "").trim().slice(0, 100);
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return res.status(400).json({ erro: "Informe um e-mail válido de uma conta já cadastrada e confirmada no aplicativo." });
       }
       const account = await findConfirmedUserByEmail(email);

@@ -11,12 +11,25 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Status do servidor para verificações técnicas.
+// Status técnico sem expor chaves: presença de configuração não garante validade da credencial.
 app.get("/api/status", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const provider = (process.env.AI_PROVIDER || "gemini").trim().toLowerCase();
+  const supportedProvider = provider === "gemini" || provider === "openai";
+  const aiConfigured = provider === "gemini"
+    ? Boolean(process.env.GEMINI_API_KEY)
+    : provider === "openai"
+      ? Boolean(process.env.OPENAI_API_KEY)
+      : false;
+  const authConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY);
   res.status(200).json({
     projeto: "Lopes Responde Pro 2.0",
     status: "online",
-    versao: "2.0"
+    versao: "2.0",
+    provedor_ia: supportedProvider ? provider : "não suportado",
+    chave_ia_presente: aiConfigured,
+    autenticacao_supabase_configurada: authConfigured,
+    observacao: "Este diagnóstico verifica apenas a presença das configurações. Não valida a chave, a cota do provedor ou a conexão com o Supabase."
   });
 });
 

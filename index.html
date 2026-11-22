@@ -91,19 +91,7 @@
 
   <section id="admin" class="screen auth">
     <div class="card" style="width:min(760px,96%);border-color:#b89543">
-      <div style="text-align:center;margin:4px 0 12px" aria-label="Folha de Cannabis sativa, elemento visual privado">
-        <svg viewBox="0 0 120 100" width="76" height="64" role="img" aria-label="Silhueta botânica dourada de folha palmada">
-          <g fill="#c5a04b" stroke="#c5a04b" stroke-linejoin="round" stroke-linecap="round">
-            <path d="M60 88 C57 68 56 48 60 8 C66 28 67 52 60 88Z"/>
-            <path d="M58 72 C45 55 33 37 25 18 C44 27 55 45 60 65Z"/>
-            <path d="M61 72 C75 54 88 35 96 16 C77 27 66 45 60 65Z"/>
-            <path d="M53 64 C37 58 22 49 8 35 C30 37 47 46 58 60Z"/>
-            <path d="M67 64 C83 57 98 47 112 33 C90 36 73 46 62 60Z"/>
-            <path d="M48 54 C39 40 34 27 33 7 C48 22 54 38 57 53Z"/>
-            <path d="M72 54 C81 39 86 25 87 6 C72 22 66 38 63 53Z"/>
-            <path d="M60 88 L60 62" fill="none" stroke-width="2.5"/>
-          </g>
-        </svg>
+      <div style="text-align:center;margin:4px 0 12px" aria-label="Marca Lopes Responde Pro"><div class="logo-mark" style="width:64px;height:64px;margin:0 auto 8px;border-radius:18px;font-size:24px">L</div>
       </div>
       <div style="text-align:center;font-size:11px;letter-spacing:.18em;color:#d9bb69">ÁREA PRIVADA</div>
       <h1 style="text-align:center">Administrador Master</h1>
@@ -188,7 +176,7 @@
         <div class="ad-title">Área reservada para anúncios</div>
         <div class="ad-text">Nenhuma rede de anúncios está conectada neste momento. Nenhum anúncio está sendo exibido ou contabilizado.</div>
       </section>
-      <div class="usage-card" id="usageCard"><strong>Uso do Social</strong><div id="usageText">Contador informativo deste aparelho.</div><div class="ad-text">Este contador não limita o acesso, não cobra valores e não comprova exibição de publicidade.</div></div>
+      <div class="usage-card" id="usageCard"><strong>Uso do Social</strong><div id="usageText">Não existe contagem regressiva ou limite de tempo ao vivo nesta versão.</div><div class="ad-text">Este contador não limita o acesso, não cobra valores e não comprova exibição de publicidade.</div></div>
       <section class="platform-panel" aria-label="Atalhos para aplicativos">
         <strong>Seus aplicativos</strong>
         <p style="font-size:12px;color:var(--muted);margin:6px 0">Estes links abrem os sites oficiais, sem exigir download. Para o Lopes operar uma conta, é necessária uma integração oficial conectada e autorizada; o atalho sozinho não conecta a conta.</p>
@@ -499,16 +487,6 @@ document.getElementById("profileButton").onclick=()=>{
   applyPlanUI();show("app");
 };
 
-const usageStartedAt=Date.now();
-const savedUsageSeconds=Math.max(0,Number(localStorage.getItem("lopes_usage_seconds")||0));
-function updateUsage(){
-  const total=savedUsageSeconds+Math.floor((Date.now()-usageStartedAt)/1000);
-  const m=Math.floor(total/60),s=total%60;
-  const el=document.getElementById("usageText");
-  if(el)el.textContent="Uso informativo nesta sessão: "+m+" min "+s+" s.";
-}
-setInterval(updateUsage,1000);
-updateUsage();
 const form=document.getElementById("chatForm"),input=document.getElementById("userInput"),messages=document.getElementById("messages"),button=document.getElementById("sendButton");
 function addMessage(text,kind){const el=document.createElement("div");el.className="bubble "+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
 form.addEventListener("submit",async(event)=>{
